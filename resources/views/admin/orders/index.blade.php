@@ -53,20 +53,20 @@
 
         .hero-panel {
             border-radius: 1.8rem;
-            padding: 2rem 2rem 1.6rem;
+            padding: 1.2rem 1.45rem 1rem;
         }
 
         .hero-title {
             color: #111111;
-            font-size: clamp(2rem, 4vw, 3rem);
-            line-height: 0.98;
-            margin-bottom: 0.45rem;
+            font-size: clamp(1.7rem, 3vw, 2.4rem);
+            line-height: 1;
+            margin-bottom: 0.25rem;
         }
 
         .hero-copy {
             color: #222222;
-            font-size: 1rem;
-            max-width: 900px;
+            font-size: 0.92rem;
+            max-width: 760px;
         }
 
         .hero-action .btn-tailor {
@@ -82,26 +82,37 @@
 
         .report-toolbar {
             border-radius: 1rem;
-            padding: 1.35rem;
+            padding: 1rem 1.1rem;
+        }
+
+        .report-toolbar .form-label {
+            font-size: 0.78rem;
+            margin-bottom: 0.45rem;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            font-weight: 700;
         }
 
         .report-toolbar .form-control,
         .report-toolbar .form-select {
-            min-height: 52px;
+            min-height: 46px;
             border-radius: 0.7rem !important;
+            padding-top: 0.45rem;
+            padding-bottom: 0.45rem;
         }
 
         .report-toolbar .btn {
             border-radius: 0.7rem !important;
+            min-height: 44px;
         }
 
         .report-filter-actions {
-            min-width: 150px;
+            min-width: 132px;
         }
 
         .report-summary-section {
             display: grid;
-            gap: 1rem;
+            gap: 0.85rem;
         }
 
         .category-summary-panel {
@@ -111,69 +122,115 @@
             box-shadow:
                 inset 0 1px 0 rgba(255, 255, 255, 0.85),
                 0 16px 36px rgba(17, 17, 17, 0.06);
-            padding: 1.35rem;
+            padding: 1rem 1.05rem;
+        }
+
+        .category-summary-toggle {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            text-align: left;
+        }
+
+        .category-summary-toggle-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(200, 155, 44, 0.24);
+            color: #111111;
+            background: rgba(255, 252, 245, 0.95);
+            flex-shrink: 0;
+            transition: transform 0.18s ease;
+        }
+
+        .category-summary-toggle[aria-expanded="true"] .category-summary-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .category-summary-body {
+            margin-top: 0.8rem;
         }
 
         .category-summary-title {
             color: #111111;
-            font-size: 1.05rem;
+            font-size: 0.96rem;
             font-weight: 700;
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.12rem;
         }
 
         .category-summary-copy {
             color: #6b5b3c;
-            font-size: 0.92rem;
+            font-size: 0.82rem;
         }
 
         .category-summary-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 0.9rem;
-            margin-top: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.7rem;
+            margin-top: 0.8rem;
         }
 
         .category-summary-card {
-            border-radius: 1rem;
+            border-radius: 0.85rem;
             border: 1px solid rgba(200, 155, 44, 0.18);
             background: rgba(255, 252, 245, 0.92);
-            padding: 1rem;
-            min-height: 124px;
+            padding: 0.8rem 0.85rem;
+            min-height: 96px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .category-summary-label {
             color: #111111;
-            font-size: 0.92rem;
+            font-size: 0.84rem;
             font-weight: 700;
+            line-height: 1.2;
         }
 
         .category-summary-qty {
             color: #b88719;
-            font-size: 1.55rem;
+            font-size: 1.28rem;
             line-height: 1;
-            margin-top: 0.75rem;
+            margin-top: 0.45rem;
             font-family: Georgia, "Times New Roman", serif;
+        }
+
+        .category-summary-footer {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-top: 0.55rem;
         }
 
         .category-summary-meta {
             color: #6b5b3c;
-            font-size: 0.82rem;
-            margin-top: 0.45rem;
+            font-size: 0.72rem;
             text-transform: uppercase;
             letter-spacing: 0.06em;
         }
 
         .category-summary-amount {
             color: #111111;
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 700;
-            margin-top: 0.25rem;
+            line-height: 1;
+            white-space: nowrap;
         }
 
         .stat-card {
             border-radius: 1.35rem;
-            padding: 1.25rem 1.35rem;
-            min-height: 140px;
+            padding: 1rem 1.1rem;
+            min-height: 108px;
             position: relative;
             overflow: hidden;
         }
@@ -197,7 +254,7 @@
 
         .stat-label {
             color: #222222;
-            font-size: 0.82rem;
+            font-size: 0.76rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 700;
@@ -205,15 +262,15 @@
 
         .stat-value {
             color: #111111;
-            font-size: clamp(2rem, 4vw, 3rem);
+            font-size: clamp(1.8rem, 3vw, 2.45rem);
             line-height: 1;
-            margin-top: 0.75rem;
+            margin-top: 0.5rem;
             font-family: Georgia, "Times New Roman", serif;
         }
 
         .stat-value.revenue {
             color: #d7a72c;
-            font-size: clamp(1.9rem, 4vw, 2.7rem);
+            font-size: clamp(1.55rem, 3vw, 2.15rem);
         }
 
         .table-card {
@@ -817,7 +874,12 @@
                     </div>
 
                     <div class="category-summary-panel">
-                        <div class="d-flex flex-column flex-lg-row justify-content-between gap-2 align-items-lg-center">
+                        <button
+                            type="button"
+                            class="category-summary-toggle"
+                            id="category-summary-toggle"
+                            aria-expanded="false"
+                            aria-controls="category-summary-body">
                             <div>
                                 <h3 class="category-summary-title">
                                     {{ $filters['thobe_category'] === '' ? 'All Categories Summary' : 'Selected Category Summary' }}
@@ -826,17 +888,26 @@
                                     Quantity and amount are calculated based on the current report filters.
                                 </p>
                             </div>
-                        </div>
+                            <span class="category-summary-toggle-icon" aria-hidden="true">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path d="m6 9 6 6 6-6"/>
+                                </svg>
+                            </span>
+                        </button>
 
-                        <div class="category-summary-grid">
-                            @foreach ($reportCategorySummaries as $summary)
-                                <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
-                                    <div class="category-summary-label">{{ $summary['label'] }}</div>
-                                    <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
-                                    <div class="category-summary-meta">Total Thobes</div>
-                                    <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
-                                </div>
-                            @endforeach
+                        <div class="category-summary-body" id="category-summary-body" hidden>
+                            <div class="category-summary-grid">
+                                @foreach ($reportCategorySummaries as $summary)
+                                    <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
+                                        <div class="category-summary-label">{{ $summary['label'] }}</div>
+                                        <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
+                                        <div class="category-summary-footer">
+                                            <div class="category-summary-meta">Total Thobes</div>
+                                            <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1098,6 +1169,8 @@
             const detailsTitle = document.getElementById('order-details-title');
             const modalStatusForm = document.getElementById('modal-status-form');
             const modalStatusSelect = document.getElementById('modal-status-select');
+            const categorySummaryToggle = document.getElementById('category-summary-toggle');
+            const categorySummaryBody = document.getElementById('category-summary-body');
             const detailFields = detailsModal
                 ? Array.from(detailsModal.querySelectorAll('[data-detail]')).reduce((fields, field) => {
                     const key = field.dataset.detail;
@@ -1158,6 +1231,15 @@
             closeDetailsButtons.forEach((button) => {
                 button.addEventListener('click', closeDetailsModal);
             });
+
+            if (categorySummaryToggle && categorySummaryBody) {
+                categorySummaryToggle.addEventListener('click', () => {
+                    const isExpanded = categorySummaryToggle.getAttribute('aria-expanded') === 'true';
+
+                    categorySummaryToggle.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+                    categorySummaryBody.hidden = isExpanded;
+                });
+            }
 
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && detailsModal && !detailsModal.hidden) {
