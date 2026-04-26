@@ -4,9 +4,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $title ?? 'Tailor Management System' }}</title>
-    <link rel="icon" type="image/png" href="{{ asset('images/tailor-logo.png') }}">
-    <link rel="shortcut icon" href="{{ asset('images/tailor-logo.png') }}">
-    <link rel="apple-touch-icon" href="{{ asset('images/tailor-logo.png') }}">
+    <link rel="icon" type="image/png" href="{{ asset('images/tailor-logo-sidebar.png') }}">
+    <link rel="shortcut icon" href="{{ asset('images/tailor-logo-sidebar.png') }}">
+    <link rel="apple-touch-icon" href="{{ asset('images/tailor-logo-sidebar.png') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         :root {
@@ -21,6 +21,11 @@
             --tailor-success: #1f9d68;
             --tailor-warning: #e0b437;
             --tailor-info: #3f8bd6;
+            --sidebar-bg: #111111;
+            --sidebar-bg-soft: #1a1a1a;
+            --sidebar-text: #ffffff;
+            --sidebar-text-soft: rgba(255, 255, 255, 0.82);
+            --sidebar-border: rgba(214, 183, 111, 0.14);
         }
 
         body {
@@ -42,31 +47,183 @@
             box-shadow: 0 18px 40px rgba(17, 17, 17, 0.06);
         }
 
+        .dashboard-shell {
+            max-width: 1580px;
+            margin: 0 auto;
+        }
+
+        .sidebar-panel {
+            position: sticky;
+            top: 1rem;
+            min-height: calc(100vh - 2rem);
+            padding: 1.8rem 1.1rem 1.35rem;
+            border-radius: 0;
+            color: var(--sidebar-text);
+            background:
+                radial-gradient(circle at 50% 43%, rgba(214, 183, 111, 0.16), transparent 7rem),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(255, 255, 255, 0)),
+                linear-gradient(180deg, var(--sidebar-bg-soft), var(--sidebar-bg));
+            border: 1px solid var(--sidebar-border);
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                0 24px 48px rgba(17, 17, 17, 0.18);
+            overflow: hidden;
+        }
+
+        .sidebar-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background:
+                repeating-linear-gradient(
+                    0deg,
+                    rgba(255, 255, 255, 0.012) 0,
+                    rgba(255, 255, 255, 0.012) 1px,
+                    transparent 1px,
+                    transparent 4px
+                ),
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(0, 0, 0, 0.04) 0,
+                    rgba(0, 0, 0, 0.04) 1px,
+                    transparent 1px,
+                    transparent 5px
+                );
+            opacity: 0.42;
+            pointer-events: none;
+        }
+
+        .sidebar-panel > * {
+            position: relative;
+            z-index: 1;
+        }
+
         .shell-logo {
-            max-width: 138px;
+            max-width: 168px;
             height: auto;
             display: block;
+            filter: brightness(0) invert(1);
         }
 
         .brand-divider {
-            border-top: 1px solid rgba(200, 155, 44, 0.2);
+            border-top: 1px solid rgba(230, 208, 154, 0.12);
+        }
+
+        .sidebar-brand {
+            padding: 0.2rem 0 0.9rem;
+        }
+
+        .sidebar-profile {
+            padding: 0.05rem 0 1rem;
+        }
+
+        .sidebar-name {
+            color: #ffffff;
+            font-size: 1.12rem;
+            font-weight: 700;
+            line-height: 1.1;
+        }
+
+        .sidebar-role {
+            margin-top: 0.35rem;
+            color: var(--sidebar-text-soft) !important;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
         }
 
         .sidebar-link {
-            color: var(--tailor-muted);
+            position: relative;
+            color: var(--sidebar-text-soft);
             text-decoration: none;
-            border-radius: 0.95rem;
-            padding: 0.85rem 1rem;
-            display: block;
+            border-radius: 1.1rem;
+            padding: 0.95rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
             border: 1px solid transparent;
-            transition: 0.2s ease;
+            transition: 0.24s ease;
+            overflow: hidden;
+        }
+
+        .sidebar-link::before {
+            content: "";
+            position: absolute;
+            left: 0.95rem;
+            right: 0.95rem;
+            top: 50%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(232, 206, 142, 0.65), transparent);
+            opacity: 0;
+            transition: 0.24s ease;
+        }
+
+        .sidebar-link-icon {
+            width: 1.15rem;
+            height: 1.15rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: #d7bc7a;
+        }
+
+        .sidebar-link-icon svg {
+            width: 1.05rem;
+            height: 1.05rem;
+        }
+
+        .sidebar-link-label {
+            position: relative;
+            z-index: 1;
+            font-weight: 600;
+            line-height: 1.2;
         }
 
         .sidebar-link:hover,
         .sidebar-link.active {
-            background: linear-gradient(135deg, rgba(17, 17, 17, 0.98), rgba(37, 37, 37, 0.98));
-            border-color: rgba(200, 155, 44, 0.4);
+            background:
+                radial-gradient(circle at right center, rgba(232, 206, 142, 0.22), transparent 14%),
+                linear-gradient(180deg, rgba(69, 62, 43, 0.95), rgba(47, 42, 31, 0.97));
+            border-color: rgba(214, 183, 111, 0.16);
             color: #ffffff;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.04),
+                0 16px 26px rgba(0, 0, 0, 0.14);
+        }
+
+        .sidebar-link:hover::before,
+        .sidebar-link.active::before {
+            opacity: 1;
+        }
+
+        .sidebar-link:hover .sidebar-link-icon,
+        .sidebar-link.active .sidebar-link-icon {
+            color: #f1d495;
+        }
+
+        .sidebar-section-label {
+            color: rgba(255, 255, 255, 0.72) !important;
+            font-size: 0.88rem;
+        }
+
+        .sidebar-content {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
+
+        .sidebar-logout {
+            margin-top: auto;
+            padding-top: 1.2rem;
+        }
+
+        .sidebar-logout-btn {
+            width: 100%;
+            background: transparent;
+            text-align: left;
+            cursor: pointer;
         }
 
         .btn-tailor {
@@ -286,43 +443,94 @@
             .shell-logo {
                 max-width: 120px;
             }
+
+            .sidebar-panel {
+                min-height: auto;
+                position: relative;
+                top: 0;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container-fluid py-4">
+    <div class="container-fluid py-4 dashboard-shell">
         <div class="row g-4">
             <div class="col-lg-3 col-xl-2">
-                <div class="navbar-tailor rounded-4 p-4 position-sticky top-0">
-                    <a href="{{ route('login') }}" class="text-decoration-none d-block">
-                        <img src="{{ asset('images/tailor-logo.png') }}" alt="Al Handaam Gents Tailoring" class="shell-logo mb-2">
+                <div class="sidebar-panel">
+                    <div class="sidebar-content">
+                    <a href="{{ route('login') }}" class="text-decoration-none d-block sidebar-brand">
+                        <img src="{{ asset('images/tailor-logo-sidebar.png') }}" alt="Al Handaam Gents Tailoring" class="shell-logo mb-2">
                     </a>
-                    <div class="mb-3">
-                        <div class="fw-semibold lh-sm" style="color: #111111;">{{ auth()->user()->name }}</div>
-                        <div class="small text-uppercase text-secondary lh-sm mt-1">{{ auth()->user()->role }}</div>
+                    <div class="sidebar-profile">
+                        <div class="sidebar-name">{{ auth()->user()->name }}</div>
+                        <div class="sidebar-role text-uppercase">{{ auth()->user()->role }}</div>
                     </div>
 
                     <div class="mb-4 pb-2 brand-divider">
-                        <div class="small text-secondary pt-2">Tailor workspace</div>
+                        <div class="sidebar-section-label pt-2">Tailor workspace</div>
                     </div>
 
                     <nav class="d-grid gap-2">
-                        <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+                        <a href="{{ route('dashboard') }}" class="sidebar-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                            <span class="sidebar-link-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M3 12a9 9 0 1 0 18 0"></path>
+                                    <path d="M12 7v5l3 2"></path>
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-label">Dashboard</span>
+                        </a>
                         @if (auth()->user()->canAccessOrderWorkspace())
-                            <a href="{{ route('admin.orders.index', ['view' => 'invoices']) }}" class="sidebar-link {{ request()->routeIs('admin.orders.index') && request('view', 'invoices') !== 'report' ? 'active' : '' }}">Tailor Invoice</a>
+                            <a href="{{ route('admin.orders.index', ['view' => 'invoices']) }}" class="sidebar-link {{ request()->routeIs('admin.orders.index') && request('view', 'invoices') !== 'report' ? 'active' : '' }}">
+                                <span class="sidebar-link-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M7 3h7l5 5v13H7z"></path>
+                                        <path d="M14 3v5h5"></path>
+                                        <path d="M10 13h6"></path>
+                                        <path d="M10 17h6"></path>
+                                    </svg>
+                                </span>
+                                <span class="sidebar-link-label">Tailor Invoice</span>
+                            </a>
                         @endif
-                        @if (auth()->user()->canManageOrderSettings())
-                            <a href="{{ route('admin.orders.index', ['view' => 'report']) }}" class="sidebar-link {{ request()->routeIs('admin.orders.index') && request('view') === 'report' ? 'active' : '' }}">Report</a>
+                        @if (auth()->user()->canAccessReports())
+                            <a href="{{ route('admin.orders.index', ['view' => 'report']) }}" class="sidebar-link {{ request()->routeIs('admin.orders.index') && request('view') === 'report' ? 'active' : '' }}">
+                                <span class="sidebar-link-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <path d="M4 19h16"></path>
+                                        <path d="M7 15l3-3 3 2 4-6"></path>
+                                    </svg>
+                                </span>
+                                <span class="sidebar-link-label">Report</span>
+                            </a>
                         @endif
                         @if (auth()->user()->canManageUsers())
-                            <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">Access Control</a>
+                            <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
+                                <span class="sidebar-link-icon">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                        <circle cx="10" cy="10" r="4.5"></circle>
+                                        <path d="M14 14l6 6"></path>
+                                    </svg>
+                                </span>
+                                <span class="sidebar-link-label">Access Control</span>
+                            </a>
                         @endif
                     </nav>
 
-                    <form action="{{ route('logout') }}" method="POST" class="mt-4">
+                    <form action="{{ route('logout') }}" method="POST" class="sidebar-logout">
                         @csrf
-                        <button type="submit" class="btn btn-outline-dark w-100 rounded-4">Logout</button>
+                        <button type="submit" class="sidebar-link sidebar-logout-btn">
+                            <span class="sidebar-link-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
+                                    <path d="M10 17l5-5-5-5"></path>
+                                    <path d="M15 12H3"></path>
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-label">Logout</span>
+                        </button>
                     </form>
+                    </div>
                 </div>
             </div>
 

@@ -81,6 +81,11 @@ class User extends Authenticatable
         return $this->isAdmin() || $this->isManager();
     }
 
+    public function canAccessReports(): bool
+    {
+        return $this->isAdmin() || $this->isManager() || $this->isUser();
+    }
+
     public function canCreateOrders(): bool
     {
         return $this->isAdmin() || $this->isManager();

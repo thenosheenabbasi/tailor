@@ -6,6 +6,7 @@ use App\Models\TailorOrder;
 use App\Models\User;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 
 class StoreTailorOrderRequest extends FormRequest
@@ -35,13 +36,24 @@ class StoreTailorOrderRequest extends FormRequest
         ];
     }
 
+    protected function prepareForValidation(): void
+    {
+        if (! $this->filled('order_date')) {
+            return;
+        }
+
+        $this->merge([
+            'order_date' => Carbon::parse($this->input('order_date'))->format('Y-m-d H:i:s'),
+        ]);
+    }
+
     public function attributes(): array
     {
         return [
             'assigned_user_id' => 'assigned user',
             'fatora_number' => 'fatora number',
             'thobe_category' => 'thobe category',
-            'order_date' => 'date',
+            'order_date' => 'date and time',
         ];
     }
 }

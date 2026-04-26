@@ -81,13 +81,22 @@
         }
 
         .report-toolbar {
-            border-radius: 1.5rem;
+            border-radius: 1rem;
             padding: 1.35rem;
         }
 
         .report-toolbar .form-control,
         .report-toolbar .form-select {
             min-height: 52px;
+            border-radius: 0.7rem !important;
+        }
+
+        .report-toolbar .btn {
+            border-radius: 0.7rem !important;
+        }
+
+        .report-filter-actions {
+            min-width: 150px;
         }
 
         .stat-card {
@@ -137,13 +146,15 @@
         }
 
         .table-card {
-            border-radius: 1.6rem;
-            padding: 1.3rem;
+            border-radius: 1rem;
+            padding: 0.85rem 0.4rem 0.4rem;
+            background: #ffffff;
+            border: 1px solid rgba(193, 153, 80, 0.16);
         }
 
         .table-card .table-responsive {
             overflow-x: auto;
-            padding-bottom: 0.35rem;
+            padding-bottom: 0.2rem;
             scrollbar-width: thin;
             scrollbar-color: rgba(197, 150, 47, 0.65) rgba(197, 150, 47, 0.08);
         }
@@ -165,82 +176,121 @@
         .table-card .table {
             color: #111111;
             margin-bottom: 0;
-            min-width: 1320px;
+            min-width: 1120px;
+            border-collapse: separate;
+            border-spacing: 0;
         }
 
         .table-card .table thead th {
-            color: #3b3020;
-            font-size: 0.92rem;
+            color: #ffffff;
+            font-size: 0.84rem;
             text-transform: uppercase;
             letter-spacing: 0.08em;
             font-weight: 700;
-            border-bottom-color: rgba(197, 150, 47, 0.16);
+            background: #111111;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.14);
             white-space: nowrap;
-            padding-top: 0.85rem;
-            padding-bottom: 0.85rem;
+            padding: 0.95rem 1rem;
+            vertical-align: middle;
+        }
+
+        .table-card .table thead th:first-child {
+            border-top-left-radius: 0.85rem;
+        }
+
+        .table-card .table thead th:last-child {
+            border-top-right-radius: 0.85rem;
         }
 
         .table-card .table tbody td {
             color: #222222;
-            padding-top: 0.65rem;
-            padding-bottom: 0.65rem;
-            border-bottom-color: rgba(197, 150, 47, 0.12);
+            padding: 1.05rem 1rem;
+            border-bottom: 1px solid rgba(201, 166, 101, 0.22);
             vertical-align: middle;
+            background: rgba(255, 252, 245, 0.94);
         }
 
         .table-card .table tbody tr:hover td {
-            background: rgba(215, 167, 44, 0.04);
+            background: #fffaf1;
         }
 
         .status-pill {
             display: inline-flex;
             align-items: center;
-            gap: 0.35rem;
-            padding: 0.4rem 0.8rem;
+            justify-content: center;
+            min-width: 108px;
+            padding: 0.45rem 0.95rem;
             border-radius: 999px;
-            font-size: 0.86rem;
-            font-weight: 600;
+            font-size: 0.84rem;
+            font-weight: 500;
             border: 1px solid transparent;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
         }
 
         .status-pill.pending {
-            color: #111111;
-            background: rgba(215, 167, 44, 0.18);
-            border-color: rgba(215, 167, 44, 0.26);
-            box-shadow: 0 0 18px rgba(215, 167, 44, 0.18);
+            color: #4c3a1f;
+            background: #f8e3be;
+            border-color: #efcf96;
+            box-shadow: none;
         }
 
         .status-pill.in-progress {
-            color: #111111;
-            background: rgba(63, 139, 214, 0.16);
-            border-color: rgba(63, 139, 214, 0.22);
-            box-shadow: 0 0 18px rgba(63, 139, 214, 0.18);
+            color: #35506d;
+            background: #dcebfa;
+            border-color: #c6dcf4;
+            box-shadow: none;
         }
 
         .status-pill.completed {
-            color: #111111;
-            background: rgba(31, 157, 104, 0.16);
-            border-color: rgba(31, 157, 104, 0.22);
-            box-shadow: 0 0 18px rgba(31, 157, 104, 0.18);
+            color: #245640;
+            background: #dcefe6;
+            border-color: #c2e1d2;
+            box-shadow: none;
         }
 
         .amount-cell {
             color: #111111;
-            font-weight: 700;
+            font-weight: 800;
+            font-size: 0.98rem;
             white-space: nowrap;
         }
 
         .date-cell {
             white-space: nowrap;
-            min-width: 145px;
+            min-width: 178px;
         }
 
         .subdued {
             color: #6b5b3c !important;
         }
 
+        .details-cell {
+            min-width: 150px;
+        }
+
+        .details-btn {
+            min-height: auto;
+            padding: 0;
+            font-size: 0.95rem;
+            font-weight: 700;
+            white-space: nowrap;
+            color: #b48a4d !important;
+            background: transparent !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            text-decoration: underline;
+            text-underline-offset: 0.18rem;
+            box-shadow: none !important;
+        }
+
+        .details-btn:hover,
+        .details-btn:focus {
+            color: #8f682c !important;
+            text-decoration-thickness: 2px;
+        }
+
         .actions-cell {
-            min-width: 290px;
+            min-width: 190px;
         }
 
         .actions-wrap {
@@ -248,24 +298,6 @@
             align-items: center;
             gap: 0.55rem;
             flex-wrap: nowrap;
-        }
-
-        .actions-wrap .status-update-form {
-            min-width: 130px;
-            margin: 0;
-        }
-
-        .actions-wrap .form-select {
-            min-height: 52px;
-            font-size: 0.88rem;
-            border-radius: 1.2rem !important;
-            border-color: rgba(197, 150, 47, 0.26);
-            background-color: rgba(255, 252, 246, 0.98);
-            padding-left: 1rem;
-            padding-right: 2.2rem;
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.8),
-                0 8px 18px rgba(197, 150, 47, 0.06);
         }
 
         .action-btn {
@@ -332,9 +364,282 @@
             padding-bottom: 0.85rem;
         }
 
+        .table-card .table tbody td:first-child,
+        .table-card .table tbody td:nth-child(2),
+        .table-card .table tbody td:nth-child(3),
+        .table-card .table tbody td:nth-child(4) {
+            color: #292522;
+        }
+
         .invoice-search {
-            max-width: 340px;
-            margin-left: auto;
+            margin-bottom: 0.55rem !important;
+        }
+
+        .invoice-search .form-control,
+        .invoice-search .form-select {
+            min-height: 48px;
+            padding-top: 0.6rem;
+            padding-bottom: 0.6rem;
+            border-radius: 4px !important;
+        }
+
+        .invoice-search-actions {
+            min-width: 150px;
+        }
+
+        .details-modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.25rem 1.25rem 2rem;
+            z-index: 1070;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.18s ease;
+        }
+
+        .details-modal.is-open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .details-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(17, 17, 17, 0.58);
+            backdrop-filter: blur(3px);
+        }
+
+        .details-modal-dialog {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            width: min(1140px, 100%);
+            max-height: calc(100vh - 3.25rem);
+            overflow: hidden;
+            border-radius: 1.1rem;
+            background: #ffffff;
+            border: 1px solid rgba(17, 17, 17, 0.12);
+            box-shadow: 0 26px 80px rgba(17, 17, 17, 0.22);
+        }
+
+        .details-modal-header {
+            position: relative;
+            padding: 1.9rem 2rem 1rem;
+        }
+
+        .details-modal-title {
+            margin: 0.2rem 0 0;
+            color: #111111;
+            font-size: clamp(1.45rem, 2vw, 2rem);
+            text-align: center;
+        }
+
+        .details-modal-close {
+            position: absolute;
+            top: 1.9rem;
+            right: 2rem;
+            width: 46px;
+            height: 38px;
+            border: 0;
+            border-radius: 0.45rem;
+            background: #ff5a5f;
+            color: #ffffff;
+            font-size: 1.4rem;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .details-modal-close:hover {
+            background: #eb4348;
+            color: #ffffff;
+        }
+
+        .details-modal-body {
+            flex: 1 1 auto;
+            min-height: 0;
+            padding: 0 2rem 3rem;
+            overflow-y: auto;
+        }
+
+        .details-hero {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            align-items: start;
+            margin-bottom: 1.4rem;
+            width: 100%;
+        }
+
+        .details-hero-side {
+            min-width: 0;
+        }
+
+        .details-hero-label {
+            display: block;
+            color: #111111;
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 0.15rem;
+        }
+
+        .details-hero-value {
+            color: #222222;
+            font-size: 0.92rem;
+        }
+
+        .details-hero-center {
+            text-align: center;
+            min-width: 0;
+            align-self: center;
+        }
+
+        .details-grid {
+            display: grid;
+            gap: 1.35rem;
+        }
+
+        .details-section {
+            border: 1px solid rgba(17, 17, 17, 0.18);
+            border-radius: 0;
+            overflow: hidden;
+            background: #ffffff;
+        }
+
+        .details-section-title {
+            padding: 0.7rem 0.9rem;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.18);
+            font-size: 0.86rem;
+            font-weight: 700;
+            color: #111111;
+            background: #ffffff;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .details-section-body {
+            padding: 0.9rem 0 1.1rem;
+        }
+
+        .details-info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 1.25rem 2rem;
+            padding: 0 0.9rem;
+        }
+
+        .details-info-grid.two-col {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .details-item-label {
+            display: block;
+            color: #3b3020;
+            font-size: 0.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .details-item-value {
+            color: #222222;
+            font-size: 0.96rem;
+            line-height: 1.5;
+            word-break: break-word;
+        }
+
+        .details-note {
+            padding: 0 0.9rem;
+            color: #222222;
+            font-size: 0.98rem;
+            line-height: 1.65;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .details-status-form {
+            padding: 0 0.9rem 1.1rem;
+        }
+
+        .details-status-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.75rem;
+            margin-top: 1.5rem;
+            padding-bottom: 0.35rem;
+            flex-wrap: wrap;
+        }
+
+        .details-status-form .form-select {
+            min-height: 52px;
+            border-radius: 0 !important;
+        }
+
+        .details-update-btn {
+            min-width: 170px;
+            min-height: 46px;
+        }
+
+        .details-close-btn {
+            min-width: 110px;
+            min-height: 46px;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        @media (max-width: 991.98px) {
+            .actions-wrap {
+                flex-wrap: wrap;
+            }
+
+            .actions-cell {
+                min-width: 240px;
+            }
+
+            .details-hero-center {
+                text-align: center;
+            }
+
+            .details-info-grid,
+            .details-info-grid.two-col {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .details-modal-header,
+            .details-modal-body {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+
+            .details-modal {
+                padding-bottom: 1.5rem;
+            }
+
+            .details-modal-dialog {
+                max-height: calc(100vh - 2.5rem);
+            }
+
+            .details-modal-close {
+                right: 1rem;
+            }
+
+            .details-info-grid,
+            .details-info-grid.two-col {
+                grid-template-columns: 1fr;
+            }
+
+            .details-status-actions {
+                justify-content: stretch;
+            }
+
+            .details-status-actions .btn {
+                width: 100%;
+            }
         }
     </style>
 
@@ -354,7 +659,7 @@
                     </div>
 
                     <div class="hero-action d-flex gap-2 flex-wrap">
-                        @if ($pageMode === 'report' && $canManageSettings)
+                        @if ($pageMode === 'report')
                             <a href="{{ route('admin.orders.index', array_merge($filters, ['export' => 'pdf'])) }}" class="btn btn-tailor px-4">Download PDF</a>
                         @else
                             <a href="{{ route('admin.orders.create') }}" class="btn btn-tailor px-4">Create New Invoice</a>
@@ -367,39 +672,55 @@
                 <div class="report-toolbar mb-4">
                     <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3 align-items-end">
                         <input type="hidden" name="view" value="report">
-                        <div class="col-md-3">
-                            <label for="assigned_user_id" class="form-label">Tailor Wise</label>
-                            <select id="assigned_user_id" name="assigned_user_id" class="form-select rounded-4">
-                                <option value="">All Tailors</option>
-                                @foreach ($assignableUsers as $assignableUser)
-                                    <option value="{{ $assignableUser->id }}" @selected($filters['assigned_user_id'] !== '' && (int) $filters['assigned_user_id'] === $assignableUser->id)>
-                                        {{ $assignableUser->name }}
+                        @if ($canFilterTailors)
+                            <div class="col-12 col-md-6 col-xl">
+                                <label for="assigned_user_id" class="form-label">Tailor Wise</label>
+                                <select id="assigned_user_id" name="assigned_user_id" class="form-select rounded-4">
+                                    <option value="">All Tailors</option>
+                                    @foreach ($assignableUsers as $assignableUser)
+                                        <option value="{{ $assignableUser->id }}" @selected($filters['assigned_user_id'] !== '' && (int) $filters['assigned_user_id'] === $assignableUser->id)>
+                                            {{ $assignableUser->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @else
+                            <input type="hidden" name="assigned_user_id" value="{{ $filters['assigned_user_id'] }}">
+                        @endif
+
+                        <div class="col-12 col-md-6 col-xl">
+                            <label for="thobe_category" class="form-label">Category Wise</label>
+                            <select id="thobe_category" name="thobe_category" class="form-select rounded-4">
+                                <option value="">All Categories</option>
+                                @foreach ($categories as $categoryValue => $category)
+                                    <option value="{{ $categoryValue }}" @selected($filters['thobe_category'] === $categoryValue)>
+                                        {{ $category['label'] }}
                                     </option>
                                 @endforeach
                             </select>
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-12 col-md-6 col-xl">
                             <label for="invoice_number" class="form-label">Invoice Number Wise</label>
                             <input type="text" id="invoice_number" name="invoice_number" value="{{ $filters['invoice_number'] }}" class="form-control rounded-4" placeholder="Invoice number">
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-12 col-md-6 col-xl">
                             <label for="fatora_number" class="form-label">Fatora Number</label>
                             <input type="text" id="fatora_number" name="fatora_number" value="{{ $filters['fatora_number'] }}" class="form-control rounded-4" placeholder="Fatora number">
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-12 col-md-6 col-xl">
                             <label for="date_from" class="form-label">Date From</label>
                             <input type="date" id="date_from" name="date_from" value="{{ $filters['date_from'] }}" class="form-control rounded-4">
                         </div>
 
-                        <div class="col-md-2">
+                        <div class="col-12 col-md-6 col-xl">
                             <label for="date_to" class="form-label">Date To</label>
                             <input type="date" id="date_to" name="date_to" value="{{ $filters['date_to'] }}" class="form-control rounded-4">
                         </div>
 
-                        <div class="col-md-1 d-grid gap-2">
+                        <div class="col-12 col-md-6 col-xl-auto d-grid gap-2 report-filter-actions">
                             <button type="submit" class="btn btn-tailor rounded-4">Filter</button>
                             <a href="{{ route('admin.orders.index', ['view' => 'report']) }}" class="btn btn-outline-secondary rounded-4">Reset</a>
                         </div>
@@ -410,15 +731,33 @@
 
             <div class="table-card">
                 @if ($pageMode !== 'report')
-                    <form method="GET" action="{{ route('admin.orders.index') }}" class="invoice-search mb-4" id="invoice-search-form">
+                    <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3 align-items-end invoice-search" id="invoice-search-form">
                         <input type="hidden" name="view" value="invoices">
-                        <input
-                            type="text"
-                            id="search"
-                            name="search"
-                            value="{{ $filters['search'] }}"
-                            class="form-control rounded-4"
-                            placeholder="Search Here...">
+                        <div class="col-12 col-xl-5 ms-xl-auto">
+                            <label for="search" class="form-label">Search</label>
+                            <input
+                                type="text"
+                                id="search"
+                                name="search"
+                                value="{{ $filters['search'] }}"
+                                class="form-control rounded-4"
+                                placeholder="Search Here...">
+                        </div>
+                        <div class="col-12 col-md-6 col-xl-3">
+                            <label for="invoice_thobe_category" class="form-label">Category Wise</label>
+                            <select id="invoice_thobe_category" name="thobe_category" class="form-select rounded-4">
+                                <option value="">All Categories</option>
+                                @foreach ($categories as $categoryValue => $category)
+                                    <option value="{{ $categoryValue }}" @selected($filters['thobe_category'] === $categoryValue)>
+                                        {{ $category['label'] }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-12 col-md-6 col-xl-auto d-grid gap-2 invoice-search-actions">
+                            <button type="submit" class="btn btn-tailor rounded-4">Filter</button>
+                            <a href="{{ route('admin.orders.index', ['view' => 'invoices']) }}" class="btn btn-outline-secondary rounded-4">Reset</a>
+                        </div>
                     </form>
                 @endif
 
@@ -433,8 +772,7 @@
                                 <th>Date</th>
                                 <th>Status</th>
                                 <th>Total Amount</th>
-                                <th>Assigned Tailor</th>
-                                <th>Added By</th>
+                                <th>View Details</th>
                                 @if ($canManageSettings && $pageMode !== 'report')
                                     <th>Actions</th>
                                 @endif
@@ -442,12 +780,30 @@
                         </thead>
                         <tbody>
                             @forelse ($orders as $order)
+                                @php
+                                    $detailPayload = [
+                                        'invoice_number' => $order->invoice_number,
+                                        'fatora_number' => $order->fatora_number ?: 'N/A',
+                                        'category' => $order->category_label,
+                                        'quantity' => (string) $order->quantity,
+                                        'order_date' => $order->order_date->format('d M Y h:i A'),
+                                        'unit_price' => number_format((float) $order->unit_price, 2) . ' QAR',
+                                        'total_amount' => number_format((float) $order->total_price, 2) . ' QAR',
+                                        'status' => $order->status_label,
+                                        'status_value' => $order->status,
+                                        'completed_at' => optional($order->completed_at)->format('d M Y h:i A') ?: 'Not completed yet',
+                                        'assigned_tailor' => $order->assignedUser?->name ?? 'Not assigned',
+                                        'added_by' => $order->creator?->name ?? 'N/A',
+                                        'note' => $order->note ?: 'No note added',
+                                        'update_status_url' => route('admin.orders.update-status', $order),
+                                    ];
+                                @endphp
                                 <tr>
                                     <td>{{ $order->invoice_number }}</td>
                                     <td>{{ $order->fatora_number ?: 'N/A' }}</td>
                                     <td>{{ $order->category_label }}</td>
                                     <td>{{ $order->quantity }}</td>
-                                    <td class="date-cell">{{ $order->order_date->format('d M Y') }}</td>
+                                    <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
                                     <td>
                                         <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
                                             {{ $order->status_label }}
@@ -457,20 +813,17 @@
                                         @endif
                                     </td>
                                     <td class="amount-cell">{{ number_format($order->total_price, 2) }} QAR</td>
-                                    <td>{{ $order->assignedUser?->name ?? 'Not assigned' }}</td>
-                                    <td>{{ $order->creator?->name ?? 'N/A' }}</td>
+                                    <td class="details-cell">
+                                        <button
+                                            type="button"
+                                            class="btn btn-outline-dark details-btn view-details-btn"
+                                            data-order="{{ json_encode($detailPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }}">
+                                            View Details
+                                        </button>
+                                    </td>
                                     @if ($canManageSettings && $pageMode !== 'report')
                                         <td class="actions-cell">
                                             <div class="actions-wrap">
-                                                <form action="{{ route('admin.orders.update-status', $order) }}" method="POST" class="status-update-form">
-                                                    @csrf
-                                                    @method('PATCH')
-                                                    <select name="status" class="form-select form-select-sm rounded-4" onchange="this.form.submit()">
-                                                        @foreach (\App\Models\TailorOrder::statuses() as $statusValue => $statusLabel)
-                                                            <option value="{{ $statusValue }}" @selected($order->status === $statusValue)>{{ $statusLabel }}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </form>
                                                 <a href="{{ route('admin.orders.edit', $order) }}" class="btn action-btn edit-btn" title="Edit Invoice" aria-label="Edit Invoice">
                                                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                                                         <path d="M12 20h9"/>
@@ -503,7 +856,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 10 : 9 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
+                                    <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 9 : 8 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>
@@ -517,12 +870,212 @@
         </div>
     </div>
 
+    <div class="details-modal" id="order-details-modal" hidden>
+        <div class="details-modal-backdrop" data-close-details-modal></div>
+        <div class="details-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="order-details-title">
+            <div class="details-modal-header">
+                <div class="details-hero">
+                    <div class="details-hero-side">
+                        <span class="details-hero-label">Start Date & Time:</span>
+                        <div class="details-hero-value" data-detail="order_date"></div>
+                    </div>
+                    <div class="details-hero-center">
+                        <h3 class="details-modal-title" id="order-details-title">Invoice Details</h3>
+                    </div>
+                </div>
+                <button type="button" class="details-modal-close" aria-label="Close details modal" data-close-details-modal>&times;</button>
+            </div>
+            <div class="details-modal-body">
+                <div class="details-grid">
+                    <section class="details-section">
+                        <div class="details-section-title">Invoice Details</div>
+                        <div class="details-section-body">
+                            <div class="details-info-grid">
+                                <div>
+                                    <span class="details-item-label">Invoice #:</span>
+                                    <div class="details-item-value" data-detail="invoice_number"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Fatora #:</span>
+                                    <div class="details-item-value" data-detail="fatora_number"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Category:</span>
+                                    <div class="details-item-value" data-detail="category"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Quantity:</span>
+                                    <div class="details-item-value" data-detail="quantity"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Unit Price:</span>
+                                    <div class="details-item-value" data-detail="unit_price"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Total Amount:</span>
+                                    <div class="details-item-value" data-detail="total_amount"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="details-section">
+                        <div class="details-section-title">People Info</div>
+                        <div class="details-section-body">
+                            <div class="details-info-grid">
+                                <div>
+                                    <span class="details-item-label">Assigned Tailor:</span>
+                                    <div class="details-item-value" data-detail="assigned_tailor"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Added By:</span>
+                                    <div class="details-item-value" data-detail="added_by"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Completed At:</span>
+                                    <div class="details-item-value" data-detail="completed_at"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="details-section">
+                        <div class="details-section-title">Other Info</div>
+                        <div class="details-section-body">
+                            <div class="details-info-grid two-col">
+                                <div>
+                                    <span class="details-item-label">Current Status:</span>
+                                    <div class="details-item-value" data-detail="status"></div>
+                                </div>
+                                <div>
+                                    <span class="details-item-label">Order Date & Time:</span>
+                                    <div class="details-item-value" data-detail="order_date"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="details-section">
+                        <div class="details-section-title">Main Note</div>
+                        <div class="details-section-body">
+                            <div class="details-note" data-detail="note"></div>
+                        </div>
+                    </section>
+
+                    @if ($canManageSettings)
+                        <section class="details-section">
+                            <div class="details-section-title">Status Update</div>
+                            <div class="details-section-body">
+                                <form method="POST" class="details-status-form" id="modal-status-form">
+                                    @csrf
+                                    @method('PATCH')
+                                    <select name="status" id="modal-status-select" class="form-select" aria-label="Status">
+                                        @foreach (\App\Models\TailorOrder::statuses() as $statusValue => $statusLabel)
+                                            <option value="{{ $statusValue }}">{{ $statusLabel }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <div class="details-status-actions">
+                                        <button type="submit" class="btn btn-tailor details-update-btn">Update Status</button>
+                                        <button type="button" class="btn btn-outline-secondary details-close-btn" data-close-details-modal>Close</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </section>
+                    @else
+                        <div class="details-status-actions">
+                            <button type="button" class="btn btn-outline-secondary details-close-btn" data-close-details-modal>Close</button>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (() => {
+            const detailsModal = document.getElementById('order-details-modal');
+            const detailButtons = document.querySelectorAll('.view-details-btn');
+            const closeDetailsButtons = document.querySelectorAll('[data-close-details-modal]');
+            const detailsTitle = document.getElementById('order-details-title');
+            const modalStatusForm = document.getElementById('modal-status-form');
+            const modalStatusSelect = document.getElementById('modal-status-select');
+            const detailFields = detailsModal
+                ? Array.from(detailsModal.querySelectorAll('[data-detail]')).reduce((fields, field) => {
+                    const key = field.dataset.detail;
+
+                    fields[key] = fields[key] || [];
+                    fields[key].push(field);
+
+                    return fields;
+                }, {})
+                : {};
+
+            const closeDetailsModal = () => {
+                if (!detailsModal) {
+                    return;
+                }
+
+                detailsModal.classList.remove('is-open');
+                document.body.classList.remove('modal-open');
+                window.setTimeout(() => {
+                    detailsModal.hidden = true;
+                }, 180);
+            };
+
+            const openDetailsModal = (order) => {
+                if (!detailsModal) {
+                    return;
+                }
+
+                if (detailsTitle) {
+                    detailsTitle.textContent = `Invoice Details - ${order.invoice_number ?? ''}`;
+                }
+
+                Object.entries(detailFields).forEach(([key, fields]) => {
+                    fields.forEach((field) => {
+                        field.textContent = order[key] ?? 'N/A';
+                    });
+                });
+
+                if (modalStatusForm && order.update_status_url) {
+                    modalStatusForm.action = order.update_status_url;
+                }
+
+                if (modalStatusSelect && order.status_value) {
+                    modalStatusSelect.value = order.status_value;
+                }
+
+                detailsModal.hidden = false;
+                document.body.classList.add('modal-open');
+                window.requestAnimationFrame(() => detailsModal.classList.add('is-open'));
+            };
+
+            detailButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    openDetailsModal(JSON.parse(button.dataset.order || '{}'));
+                });
+            });
+
+            closeDetailsButtons.forEach((button) => {
+                button.addEventListener('click', closeDetailsModal);
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && detailsModal && !detailsModal.hidden) {
+                    closeDetailsModal();
+                }
+            });
+        })();
+    </script>
+
     @if ($pageMode !== 'report')
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
         <script>
             (() => {
                 const form = document.getElementById('invoice-search-form');
                 const searchInput = document.getElementById('search');
+                const categorySelect = document.getElementById('invoice_thobe_category');
                 const deleteForms = document.querySelectorAll('.delete-order-form');
 
                 if (form && searchInput) {
@@ -532,6 +1085,10 @@
                         window.clearTimeout(timeoutId);
                         timeoutId = window.setTimeout(() => form.submit(), 350);
                     });
+                }
+
+                if (form && categorySelect) {
+                    categorySelect.addEventListener('change', () => form.submit());
                 }
 
                 deleteForms.forEach((deleteForm) => {

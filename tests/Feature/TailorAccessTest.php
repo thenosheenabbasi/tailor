@@ -39,6 +39,7 @@ class TailorAccessTest extends TestCase
             ->get(route('admin.orders.index'))
             ->assertOk()
             ->assertSee('Create New Invoice')
+            ->assertSee('Report')
             ->assertDontSee('Actions')
             ->assertDontSee('Download PDF');
 
@@ -49,7 +50,10 @@ class TailorAccessTest extends TestCase
         $this->actingAs($manager)
             ->get(route('admin.orders.index', ['view' => 'report']))
             ->assertOk()
-            ->assertDontSee('Download PDF');
+            ->assertSee('Reports')
+            ->assertSee('Tailor Wise')
+            ->assertSee('Download PDF')
+            ->assertDontSee('Create New Invoice');
 
         $this->actingAs($manager)
             ->get(route('admin.orders.edit', $order))
@@ -64,13 +68,14 @@ class TailorAccessTest extends TestCase
     {
         $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
         $assignedUser = User::factory()->create(['role' => User::ROLE_USER]);
+        $orderDate = now()->setTime(14, 30, 0);
 
         $response = $this->actingAs($manager)->post(route('admin.orders.store'), [
             'assigned_user_id' => $assignedUser->id,
             'fatora_number' => 'FAT-201',
             'thobe_category' => TailorOrder::CATEGORY_DESIGN,
             'quantity' => 3,
-            'order_date' => now()->toDateString(),
+            'order_date' => $orderDate->format('Y-m-d\\TH:i'),
             'note' => 'Manager entry',
         ]);
 
@@ -83,6 +88,7 @@ class TailorAccessTest extends TestCase
             'fatora_number' => 'FAT-201',
             'thobe_category' => TailorOrder::CATEGORY_DESIGN,
             'quantity' => 3,
+            'order_date' => $orderDate->format('Y-m-d H:i:s'),
             'unit_price' => 30,
             'total_price' => 90,
             'status' => TailorOrder::STATUS_PENDING,
@@ -128,6 +134,92 @@ class TailorAccessTest extends TestCase
         $response->assertSee('Monthly Orders');
         $response->assertSee('Status wise orders ka visual summary.');
         $response->assertDontSee('INV-U2');
+    }
+
+    public function test_user_can_access_only_own_report_data(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $userOne = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'User One']);
+        $userTwo = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'User Two']);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $userOne->id,
+            'tailor_name' => $userOne->name,
+            'invoice_number' => 'INV-USER-REPORT-1',
+            'fatora_number' => 'FAT-UR1',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 2,
+            'order_date' => now()->setTime(18, 15, 0),
+            'unit_price' => 20,
+            'total_price' => 40,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $userTwo->id,
+            'tailor_name' => $userTwo->name,
+            'invoice_number' => 'INV-USER-REPORT-2',
+            'fatora_number' => 'FAT-UR2',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+            'quantity' => 1,
+            'order_date' => now()->setTime(19, 0, 0),
+            'unit_price' => 30,
+            'total_price' => 30,
+        ]);
+
+        $this->actingAs($userOne)
+            ->get(route('admin.orders.index', ['view' => 'report', 'assigned_user_id' => $userTwo->id]))
+            ->assertOk()
+            ->assertSee('Report')
+            ->assertSee('Download PDF')
+            ->assertSee('INV-USER-REPORT-1')
+            ->assertDontSee('INV-USER-REPORT-2')
+            ->assertDontSee('Tailor Invoice')
+            ->assertDontSee('Tailor Wise');
+    }
+
+    public function test_user_can_download_only_own_report_pdf(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $user = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Scoped User']);
+        $otherUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Other User']);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $user->id,
+            'tailor_name' => $user->name,
+            'invoice_number' => 'INV-UPDF-1',
+            'fatora_number' => 'FAT-UPDF1',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 2,
+            'order_date' => now()->setTime(20, 2, 0),
+            'unit_price' => 20,
+            'total_price' => 40,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $otherUser->id,
+            'tailor_name' => $otherUser->name,
+            'invoice_number' => 'INV-UPDF-2',
+            'fatora_number' => 'FAT-UPDF2',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+            'quantity' => 1,
+            'order_date' => now()->setTime(21, 0, 0),
+            'unit_price' => 30,
+            'total_price' => 30,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.orders.index', [
+            'view' => 'report',
+            'assigned_user_id' => $otherUser->id,
+            'export' => 'pdf',
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $response->assertHeader('content-disposition');
     }
 
     public function test_dashboard_completed_thobes_uses_completed_quantity_total(): void
@@ -285,6 +377,181 @@ class TailorAccessTest extends TestCase
         $response->assertDontSee('INV-USER-2');
     }
 
+    public function test_admin_can_filter_reports_by_category(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Category User']);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-CAT-ADMIN-1',
+            'fatora_number' => 'FAT-CAT-1',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 20,
+            'total_price' => 20,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-CAT-ADMIN-2',
+            'fatora_number' => 'FAT-CAT-2',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 30,
+            'total_price' => 30,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'view' => 'report',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('INV-CAT-ADMIN-2');
+        $response->assertDontSee('INV-CAT-ADMIN-1');
+    }
+
+    public function test_manager_can_filter_invoices_by_category(): void
+    {
+        $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
+        $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Manager Category User']);
+
+        TailorOrder::create([
+            'user_id' => $manager->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-CAT-MANAGER-1',
+            'fatora_number' => 'FAT-MGR-1',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 20,
+            'total_price' => 20,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $manager->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-CAT-MANAGER-2',
+            'fatora_number' => 'FAT-MGR-2',
+            'thobe_category' => TailorOrder::CATEGORY_EMBROIDERY,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 25,
+            'total_price' => 25,
+        ]);
+
+        $response = $this->actingAs($manager)->get(route('admin.orders.index', [
+            'view' => 'invoices',
+            'thobe_category' => TailorOrder::CATEGORY_EMBROIDERY,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('INV-CAT-MANAGER-2');
+        $response->assertDontSee('INV-CAT-MANAGER-1');
+    }
+
+    public function test_user_can_filter_own_reports_by_category(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $user = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Scoped Category User']);
+        $otherUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Other Category User']);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $user->id,
+            'tailor_name' => $user->name,
+            'invoice_number' => 'INV-CAT-USER-1',
+            'fatora_number' => 'FAT-USER-1',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 20,
+            'total_price' => 20,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $user->id,
+            'tailor_name' => $user->name,
+            'invoice_number' => 'INV-CAT-USER-2',
+            'fatora_number' => 'FAT-USER-2',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 30,
+            'total_price' => 30,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $otherUser->id,
+            'tailor_name' => $otherUser->name,
+            'invoice_number' => 'INV-CAT-OTHER-1',
+            'fatora_number' => 'FAT-OTHER-1',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 30,
+            'total_price' => 30,
+        ]);
+
+        $response = $this->actingAs($user)->get(route('admin.orders.index', [
+            'view' => 'report',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('INV-CAT-USER-2');
+        $response->assertDontSee('INV-CAT-USER-1');
+        $response->assertDontSee('INV-CAT-OTHER-1');
+    }
+
+    public function test_invoice_and_report_pages_include_details_modal_with_status_update(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Tailor Detail']);
+        $orderDate = now()->setTime(9, 45, 0);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-DETAIL-1',
+            'fatora_number' => 'FAT-DETAIL',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 2,
+            'order_date' => $orderDate,
+            'unit_price' => 20,
+            'total_price' => 40,
+            'note' => 'Stitch cuffs carefully',
+            'status' => TailorOrder::STATUS_PENDING,
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('admin.orders.index'))
+            ->assertOk()
+            ->assertSee('View Details')
+            ->assertSee($orderDate->format('d M Y h:i A'))
+            ->assertSee('Status Update')
+            ->assertSee('Update Status');
+
+        $this->actingAs($admin)
+            ->get(route('admin.orders.index', ['view' => 'report']))
+            ->assertOk()
+            ->assertSee('View Details')
+            ->assertSee('Status Update')
+            ->assertSee('Update Status');
+    }
+
     public function test_admin_can_download_filtered_report_as_pdf(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
@@ -304,6 +571,35 @@ class TailorAccessTest extends TestCase
         ]);
 
         $response = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'view' => 'report',
+            'assigned_user_id' => $assignedUser->id,
+            'export' => 'pdf',
+        ]));
+
+        $response->assertOk();
+        $response->assertHeader('content-type', 'application/pdf');
+        $response->assertHeader('content-disposition');
+    }
+
+    public function test_manager_can_download_filtered_report_as_pdf(): void
+    {
+        $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
+        $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Manager PDF User']);
+
+        TailorOrder::create([
+            'user_id' => $manager->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-MPDF-1',
+            'fatora_number' => 'FAT-MPDF',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 2,
+            'order_date' => now()->setTime(20, 2, 0),
+            'unit_price' => 20,
+            'total_price' => 40,
+        ]);
+
+        $response = $this->actingAs($manager)->get(route('admin.orders.index', [
             'view' => 'report',
             'assigned_user_id' => $assignedUser->id,
             'export' => 'pdf',

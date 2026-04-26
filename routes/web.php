@@ -22,8 +22,11 @@ Route::middleware('auth')->group(function (): void {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
     Route::get('/dashboard', DashboardController::class)->name('dashboard');
 
-    Route::middleware('role:admin,manager')->prefix('admin')->name('admin.')->group(function (): void {
+    Route::middleware('role:admin,manager,user')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/orders', [TailorOrderController::class, 'index'])->name('orders.index');
+    });
+
+    Route::middleware('role:admin,manager')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/orders/create', [TailorOrderController::class, 'create'])->name('orders.create');
         Route::post('/orders', [TailorOrderController::class, 'store'])->name('orders.store');
 

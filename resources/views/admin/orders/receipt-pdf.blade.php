@@ -417,7 +417,7 @@
                         <tr>
                             <td>{{ $order->category_label }}</td>
                             <td>{{ $order->quantity }}</td>
-                            <td>{{ $order->order_date->format('d M Y') }}</td>
+                            <td>{{ $order->order_date->format('d M Y h:i A') }}</td>
                             <td>{{ number_format((float) $order->unit_price, 2) }} QAR</td>
                             <td><strong>{{ number_format((float) $order->total_price, 2) }} QAR</strong></td>
                         </tr>

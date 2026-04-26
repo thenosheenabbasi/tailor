@@ -84,8 +84,8 @@
                     </div>
 
                     <div class="col-md-6">
-                        <label for="order_date" class="form-label">Date</label>
-                        <input type="date" id="order_date" name="order_date" value="{{ old('order_date', optional($order?->order_date)->toDateString() ?? now()->toDateString()) }}" class="form-control rounded-4 @error('order_date') is-invalid @enderror" required>
+                        <label for="order_date" class="form-label">Date & Time</label>
+                        <input type="datetime-local" id="order_date" name="order_date" step="60" value="{{ old('order_date', optional($order?->order_date)->format('Y-m-d\\TH:i') ?? now()->format('Y-m-d\\TH:i')) }}" class="form-control rounded-4 @error('order_date') is-invalid @enderror" required>
                         @error('order_date')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

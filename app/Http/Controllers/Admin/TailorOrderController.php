@@ -16,30 +16,39 @@ class TailorOrderController extends Controller
 {
     public function index(Request $request): View|Response
     {
-        abort_unless($request->user()?->canAccessOrderWorkspace(), 403, 'You are not authorized to access this section.');
+        $user = $request->user();
 
-        $canManageSettings = $request->user()?->canManageOrderSettings() ?? false;
+        abort_unless($user?->canAccessReports(), 403, 'You are not authorized to access this section.');
+
+        $canManageSettings = $user?->canManageOrderSettings() ?? false;
+        $canAccessReport = $user?->canAccessReports() ?? false;
         $requestedMode = $request->string('view')->toString();
-        $pageMode = $canManageSettings && $requestedMode === 'report' ? 'report' : 'invoices';
+        $pageMode = $user?->isUser()
+            ? 'report'
+            : ($canAccessReport && $requestedMode === 'report' ? 'report' : 'invoices');
 
         $filters = [
             'view' => $pageMode,
             'search' => $request->string('search')->toString(),
-            'assigned_user_id' => $request->string('assigned_user_id')->toString(),
+            'assigned_user_id' => $user?->isUser() ? (string) $user->id : $request->string('assigned_user_id')->toString(),
+            'thobe_category' => $request->string('thobe_category')->toString(),
             'invoice_number' => $request->string('invoice_number')->toString(),
             'fatora_number' => $request->string('fatora_number')->toString(),
             'date_from' => $request->string('date_from')->toString(),
             'date_to' => $request->string('date_to')->toString(),
         ];
 
-        $selectedAssignedUser = $filters['assigned_user_id'] !== ''
+        $selectedAssignedUser = $user?->isUser()
+            ? $user
+            : ($filters['assigned_user_id'] !== ''
             ? User::query()
                 ->where('role', User::ROLE_USER)
                 ->find($filters['assigned_user_id'], ['id', 'name'])
-            : null;
+            : null);
 
         $ordersQuery = TailorOrder::query()
             ->with(['creator', 'assignedUser'])
+            ->when($user?->isUser(), fn ($query) => $query->where('assigned_user_id', $user->id))
             ->when($filters['search'] !== '', function ($query) use ($filters) {
                 $search = $filters['search'];
 
@@ -51,6 +60,7 @@ class TailorOrderController extends Controller
                 });
             })
             ->when($filters['assigned_user_id'] !== '', fn ($query) => $query->where('assigned_user_id', $filters['assigned_user_id']))
+            ->when($filters['thobe_category'] !== '', fn ($query) => $query->where('thobe_category', $filters['thobe_category']))
             ->when($filters['invoice_number'] !== '', fn ($query) => $query->where('invoice_number', 'like', '%' . $filters['invoice_number'] . '%'))
             ->when($filters['fatora_number'] !== '', fn ($query) => $query->where('fatora_number', 'like', '%' . $filters['fatora_number'] . '%'))
             ->when($filters['date_from'] !== '', fn ($query) => $query->whereDate('order_date', '>=', $filters['date_from']))
@@ -58,7 +68,7 @@ class TailorOrderController extends Controller
             ->latestFirst();
 
         if ($request->get('export') === 'pdf') {
-            abort_unless($canManageSettings, 403, 'You are not authorized to access this section.');
+            abort_unless($canAccessReport, 403, 'You are not authorized to access this section.');
 
             return $this->downloadPdf(clone $ordersQuery, $filters, $selectedAssignedUser);
         }
@@ -67,10 +77,12 @@ class TailorOrderController extends Controller
 
         return view('admin.orders.index', [
             'orders' => $ordersQuery->paginate(10)->withQueryString(),
-            'assignableUsers' => User::query()
-                ->where('role', User::ROLE_USER)
-                ->orderBy('name')
-                ->get(['id', 'name']),
+            'assignableUsers' => $user?->isUser()
+                ? User::query()->whereKey($user->id)->get(['id', 'name'])
+                : User::query()
+                    ->where('role', User::ROLE_USER)
+                    ->orderBy('name')
+                    ->get(['id', 'name']),
             'filters' => $filters,
             'pageMode' => $pageMode,
             'selectedAssignedUser' => $selectedAssignedUser,
@@ -81,6 +93,7 @@ class TailorOrderController extends Controller
             ],
             'categories' => TailorOrder::categories(),
             'canManageSettings' => $canManageSettings,
+            'canFilterTailors' => ! $user?->isUser(),
         ]);
     }
 

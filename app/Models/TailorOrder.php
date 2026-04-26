@@ -39,7 +39,7 @@ class TailorOrder extends Model
     protected function casts(): array
     {
         return [
-            'order_date' => 'date',
+            'order_date' => 'datetime',
             'unit_price' => 'decimal:2',
             'total_price' => 'decimal:2',
             'completed_at' => 'datetime',

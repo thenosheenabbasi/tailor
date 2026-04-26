@@ -2,6 +2,7 @@
     $logoPath = public_path('images/tailor-logo.png');
     $logoData = file_exists($logoPath) ? 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath)) : null;
     $selectedUserName = $selectedAssignedUser?->name ?? 'All Users';
+    $selectedCategoryName = $filters['thobe_category'] !== '' ? (\App\Models\TailorOrder::categories()[$filters['thobe_category']]['label'] ?? ucwords(str_replace('_', ' ', $filters['thobe_category']))) : 'All Categories';
     $selectedFatoraNumber = $filters['fatora_number'] !== '' ? $filters['fatora_number'] : 'All';
     $fromDate = $filters['date_from'] !== '' ? \Illuminate\Support\Carbon::parse($filters['date_from'])->format('d F Y') : 'All Dates';
     $toDate = $filters['date_to'] !== '' ? \Illuminate\Support\Carbon::parse($filters['date_to'])->format('d F Y') : 'Today';
@@ -285,6 +286,9 @@
                                 <span class="meta-key">TAILOR NAME</span><span class="meta-separator">:</span><span class="meta-value">{{ $selectedUserName }}</span>
                             </div>
                             <div class="meta-row">
+                                <span class="meta-key">CATEGORY</span><span class="meta-separator">:</span><span class="meta-value">{{ $selectedCategoryName }}</span>
+                            </div>
+                            <div class="meta-row">
                                 <span class="meta-key">FATORA NUMBER</span><span class="meta-separator">:</span><span class="meta-value">{{ $selectedFatoraNumber }}</span>
                             </div>
                         </div>
@@ -321,6 +325,7 @@
                             <th>Fatora #</th>
                             <th>Category</th>
                             <th>Qty</th>
+                            <th>Main Note</th>
                             <th>Date</th>
                             <th>Total Amount</th>
                             <th>Assigned Tailor</th>
@@ -335,7 +340,8 @@
                                 <td>{{ $order->fatora_number ?: 'N/A' }}</td>
                                 <td>{{ $order->category_label }}</td>
                                 <td>{{ $order->quantity }}</td>
-                                <td>{{ $order->order_date->format('d M Y') }}</td>
+                                <td>{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 70) }}</td>
+                                <td>{{ $order->order_date->format('d M Y h:i A') }}</td>
                                 <td class="amount">{{ number_format((float) $order->total_price, 2) }} QAR</td>
                                 <td>{{ $order->assignedUser?->name ?? 'Not assigned' }}</td>
                                   <td>
@@ -350,7 +356,7 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="9" class="empty">No report data found for the selected filters.</td>
+                                <td colspan="10" class="empty">No report data found for the selected filters.</td>
                             </tr>
                         @endforelse
                     </tbody>
