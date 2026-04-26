@@ -383,10 +383,6 @@
             border-radius: 4px !important;
         }
 
-        .invoice-search-actions {
-            min-width: 150px;
-        }
-
         .details-modal {
             position: fixed;
             inset: 0;
@@ -734,7 +730,6 @@
                     <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3 align-items-end invoice-search" id="invoice-search-form">
                         <input type="hidden" name="view" value="invoices">
                         <div class="col-12 col-xl-5 ms-xl-auto">
-                            <label for="search" class="form-label">Search</label>
                             <input
                                 type="text"
                                 id="search"
@@ -742,21 +737,6 @@
                                 value="{{ $filters['search'] }}"
                                 class="form-control rounded-4"
                                 placeholder="Search Here...">
-                        </div>
-                        <div class="col-12 col-md-6 col-xl-3">
-                            <label for="invoice_thobe_category" class="form-label">Category Wise</label>
-                            <select id="invoice_thobe_category" name="thobe_category" class="form-select rounded-4">
-                                <option value="">All Categories</option>
-                                @foreach ($categories as $categoryValue => $category)
-                                    <option value="{{ $categoryValue }}" @selected($filters['thobe_category'] === $categoryValue)>
-                                        {{ $category['label'] }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="col-12 col-md-6 col-xl-auto d-grid gap-2 invoice-search-actions">
-                            <button type="submit" class="btn btn-tailor rounded-4">Filter</button>
-                            <a href="{{ route('admin.orders.index', ['view' => 'invoices']) }}" class="btn btn-outline-secondary rounded-4">Reset</a>
                         </div>
                     </form>
                 @endif
@@ -1075,7 +1055,6 @@
             (() => {
                 const form = document.getElementById('invoice-search-form');
                 const searchInput = document.getElementById('search');
-                const categorySelect = document.getElementById('invoice_thobe_category');
                 const deleteForms = document.querySelectorAll('.delete-order-form');
 
                 if (form && searchInput) {
@@ -1085,10 +1064,6 @@
                         window.clearTimeout(timeoutId);
                         timeoutId = window.setTimeout(() => form.submit(), 350);
                     });
-                }
-
-                if (form && categorySelect) {
-                    categorySelect.addEventListener('change', () => form.submit());
                 }
 
                 deleteForms.forEach((deleteForm) => {
