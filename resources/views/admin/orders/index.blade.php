@@ -852,27 +852,6 @@
                 </div>
 
                 <div class="report-summary-section mb-4">
-                    <div class="row g-3">
-                        <div class="col-12 col-md-6 col-xl-4">
-                            <div class="stat-card orders">
-                                <div class="stat-label">Total Invoices</div>
-                                <div class="stat-value">{{ $reportStats['orders'] }}</div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6 col-xl-4">
-                            <div class="stat-card thobes">
-                                <div class="stat-label">Total Thobes</div>
-                                <div class="stat-value">{{ $reportStats['thobes'] }}</div>
-                            </div>
-                        </div>
-                        <div class="col-12 col-md-6 col-xl-4">
-                            <div class="stat-card revenue">
-                                <div class="stat-label">Total Revenue</div>
-                                <div class="stat-value revenue">{{ number_format($reportStats['revenue'], 2) }} QAR</div>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="category-summary-panel">
                         <button
                             type="button"
