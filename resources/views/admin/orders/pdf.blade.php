@@ -153,6 +153,117 @@
             border-right: none;
         }
 
+        .category-summary-section {
+            margin: 12px 0 14px;
+            padding: 12px;
+            border: 1px solid #dcc492;
+            border-radius: 18px;
+            background: #ffffff;
+        }
+
+        .category-summary-header {
+            margin-bottom: 8px;
+        }
+
+        .category-summary-kicker {
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #8a6a2b;
+            font-weight: bold;
+        }
+
+        .category-summary-title {
+            font-size: 17px;
+            font-weight: bold;
+            color: #20170f;
+            margin-top: 2px;
+        }
+
+        .category-summary-copy {
+            font-size: 10px;
+            color: #6d5a41;
+            margin-top: 2px;
+            line-height: 1.4;
+        }
+
+        .category-summary-grid {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px 8px;
+            margin: 0 -8px -8px;
+        }
+
+        .category-summary-grid td {
+            width: 33.33%;
+            vertical-align: top;
+        }
+
+        .category-summary-empty {
+            border: none !important;
+            background: transparent !important;
+        }
+
+        .category-summary-card {
+            border: 1px solid #e2cfab;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #fffdf8 0%, #f7ecd8 100%);
+            padding: 10px 11px;
+            min-height: 94px;
+        }
+
+        .category-summary-top {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .category-summary-name {
+            font-size: 12px;
+            font-weight: bold;
+            color: #241a11;
+        }
+
+        .category-summary-rate {
+            font-size: 10px;
+            color: #7d6541;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .category-summary-qty {
+            font-size: 24px;
+            line-height: 1;
+            color: #b57e13;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .category-summary-footer {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+        }
+
+        .category-summary-meta {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: #86652b;
+            white-space: nowrap;
+        }
+
+        .category-summary-amount {
+            font-size: 13px;
+            font-weight: bold;
+            color: #17110c;
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .category-summary-zero {
+            opacity: 0.75;
+        }
+
         .summary-label {
             font-size: 10px;
             text-transform: uppercase;
@@ -178,6 +289,10 @@
 
         .report-wrap {
             margin-top: 16px;
+        }
+
+        .report-table thead {
+            display: table-row-group;
         }
 
         .report-table thead th {
@@ -316,6 +431,45 @@
                     </td>
                 </tr>
             </table>
+
+            @php($categorySummaryChunks = collect($reportCategorySummaries)->chunk(3))
+
+            <div class="category-summary-section">
+                <div class="category-summary-header">
+                    <div class="category-summary-kicker">Category Overview</div>
+                    <div class="category-summary-title">{{ count($reportCategorySummaries) > 1 ? 'All Categories Breakdown' : 'Selected Category Breakdown' }}</div>
+                    <div class="category-summary-copy">Each card shows the total stitched thobes and total amount for the filtered report range.</div>
+                </div>
+
+                <table class="category-summary-grid">
+                    @foreach ($categorySummaryChunks as $summaryChunk)
+                        <tr>
+                            @foreach ($summaryChunk as $summary)
+                                <td>
+                                    <div class="category-summary-card {{ $summary['quantity'] === 0 ? 'category-summary-zero' : '' }}">
+                                        <table class="category-summary-top">
+                                            <tr>
+                                                <td class="category-summary-name">{{ $summary['label'] }}</td>
+                                                <td class="category-summary-rate">{{ number_format($summary['unit_price'], 2) }} QAR</td>
+                                            </tr>
+                                        </table>
+                                        <div class="category-summary-qty">{{ $summary['quantity'] }}</div>
+                                        <table class="category-summary-footer">
+                                            <tr>
+                                                <td class="category-summary-meta">Total Thobes</td>
+                                                <td class="category-summary-amount">{{ number_format($summary['amount'], 2) }} QAR</td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            @endforeach
+                            @for ($i = $summaryChunk->count(); $i < 3; $i++)
+                                <td class="category-summary-empty"></td>
+                            @endfor
+                        </tr>
+                    @endforeach
+                </table>
+            </div>
 
             <div class="report-wrap">
                 <table class="report-table">

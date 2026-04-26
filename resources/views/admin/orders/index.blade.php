@@ -99,6 +99,77 @@
             min-width: 150px;
         }
 
+        .report-summary-section {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .category-summary-panel {
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(252, 250, 245, 0.97));
+            border: 1px solid rgba(200, 155, 44, 0.2);
+            border-radius: 1.35rem;
+            box-shadow:
+                inset 0 1px 0 rgba(255, 255, 255, 0.85),
+                0 16px 36px rgba(17, 17, 17, 0.06);
+            padding: 1.35rem;
+        }
+
+        .category-summary-title {
+            color: #111111;
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .category-summary-copy {
+            color: #6b5b3c;
+            font-size: 0.92rem;
+        }
+
+        .category-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 0.9rem;
+            margin-top: 1rem;
+        }
+
+        .category-summary-card {
+            border-radius: 1rem;
+            border: 1px solid rgba(200, 155, 44, 0.18);
+            background: rgba(255, 252, 245, 0.92);
+            padding: 1rem;
+            min-height: 124px;
+        }
+
+        .category-summary-label {
+            color: #111111;
+            font-size: 0.92rem;
+            font-weight: 700;
+        }
+
+        .category-summary-qty {
+            color: #b88719;
+            font-size: 1.55rem;
+            line-height: 1;
+            margin-top: 0.75rem;
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        .category-summary-meta {
+            color: #6b5b3c;
+            font-size: 0.82rem;
+            margin-top: 0.45rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .category-summary-amount {
+            color: #111111;
+            font-size: 1rem;
+            font-weight: 700;
+            margin-top: 0.25rem;
+        }
+
         .stat-card {
             border-radius: 1.35rem;
             padding: 1.25rem 1.35rem;
@@ -721,6 +792,53 @@
                             <a href="{{ route('admin.orders.index', ['view' => 'report']) }}" class="btn btn-outline-secondary rounded-4">Reset</a>
                         </div>
                     </form>
+                </div>
+
+                <div class="report-summary-section mb-4">
+                    <div class="row g-3">
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="stat-card orders">
+                                <div class="stat-label">Total Invoices</div>
+                                <div class="stat-value">{{ $reportStats['orders'] }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="stat-card thobes">
+                                <div class="stat-label">Total Thobes</div>
+                                <div class="stat-value">{{ $reportStats['thobes'] }}</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-6 col-xl-4">
+                            <div class="stat-card revenue">
+                                <div class="stat-label">Total Revenue</div>
+                                <div class="stat-value revenue">{{ number_format($reportStats['revenue'], 2) }} QAR</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="category-summary-panel">
+                        <div class="d-flex flex-column flex-lg-row justify-content-between gap-2 align-items-lg-center">
+                            <div>
+                                <h3 class="category-summary-title">
+                                    {{ $filters['thobe_category'] === '' ? 'All Categories Summary' : 'Selected Category Summary' }}
+                                </h3>
+                                <p class="category-summary-copy mb-0">
+                                    Quantity and amount are calculated based on the current report filters.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="category-summary-grid">
+                            @foreach ($reportCategorySummaries as $summary)
+                                <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
+                                    <div class="category-summary-label">{{ $summary['label'] }}</div>
+                                    <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
+                                    <div class="category-summary-meta">Total Thobes</div>
+                                    <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
 
             @endif

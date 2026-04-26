@@ -7,6 +7,7 @@ use App\Http\Requests\StoreTailorOrderRequest;
 use App\Models\TailorOrder;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Response;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -46,7 +47,7 @@ class TailorOrderController extends Controller
                 ->find($filters['assigned_user_id'], ['id', 'name'])
             : null);
 
-        $ordersQuery = TailorOrder::query()
+        $filteredOrdersQuery = TailorOrder::query()
             ->with(['creator', 'assignedUser'])
             ->when($user?->isUser(), fn ($query) => $query->where('assigned_user_id', $user->id))
             ->when($filters['search'] !== '', function ($query) use ($filters) {
@@ -64,16 +65,15 @@ class TailorOrderController extends Controller
             ->when($filters['invoice_number'] !== '', fn ($query) => $query->where('invoice_number', 'like', '%' . $filters['invoice_number'] . '%'))
             ->when($filters['fatora_number'] !== '', fn ($query) => $query->where('fatora_number', 'like', '%' . $filters['fatora_number'] . '%'))
             ->when($filters['date_from'] !== '', fn ($query) => $query->whereDate('order_date', '>=', $filters['date_from']))
-            ->when($filters['date_to'] !== '', fn ($query) => $query->whereDate('order_date', '<=', $filters['date_to']))
-            ->latestFirst();
+            ->when($filters['date_to'] !== '', fn ($query) => $query->whereDate('order_date', '<=', $filters['date_to']));
+
+        $ordersQuery = (clone $filteredOrdersQuery)->latestFirst();
 
         if ($request->get('export') === 'pdf') {
             abort_unless($canAccessReport, 403, 'You are not authorized to access this section.');
 
             return $this->downloadPdf(clone $ordersQuery, $filters, $selectedAssignedUser);
         }
-
-        $filteredOrdersQuery = clone $ordersQuery;
 
         return view('admin.orders.index', [
             'orders' => $ordersQuery->paginate(10)->withQueryString(),
@@ -91,6 +91,7 @@ class TailorOrderController extends Controller
                 'thobes' => (clone $filteredOrdersQuery)->sum('quantity'),
                 'revenue' => (clone $filteredOrdersQuery)->revenueTotal(),
             ],
+            'reportCategorySummaries' => $this->buildCategorySummaries(clone $filteredOrdersQuery, $filters['thobe_category']),
             'categories' => TailorOrder::categories(),
             'canManageSettings' => $canManageSettings,
             'canFilterTailors' => ! $user?->isUser(),
@@ -247,9 +248,61 @@ class TailorOrderController extends Controller
             'filters' => $filters,
             'selectedAssignedUser' => $selectedAssignedUser,
             'reportStats' => $reportStats,
+            'reportCategorySummaries' => $this->buildCategorySummariesFromCollection($orders, $filters['thobe_category']),
             'generatedAt' => now(),
         ])->setPaper('a4', 'landscape');
 
         return $pdf->download('tailor-report-' . now()->format('Y-m-d-His') . '.pdf');
+    }
+
+    protected function buildCategorySummaries(Builder $ordersQuery, string $selectedCategory = ''): array
+    {
+        $groupedSummaries = (clone $ordersQuery)
+            ->selectRaw('thobe_category, SUM(quantity) as quantity_total, SUM(total_price) as amount_total')
+            ->groupBy('thobe_category')
+            ->get()
+            ->keyBy('thobe_category');
+
+        return $this->mapCategorySummaries($groupedSummaries, $selectedCategory);
+    }
+
+    protected function buildCategorySummariesFromCollection($orders, string $selectedCategory = ''): array
+    {
+        $groupedSummaries = $orders
+            ->groupBy('thobe_category')
+            ->map(function ($categoryOrders, string $categoryKey) {
+                return (object) [
+                    'thobe_category' => $categoryKey,
+                    'quantity_total' => (int) $categoryOrders->sum('quantity'),
+                    'amount_total' => (float) $categoryOrders->sum('total_price'),
+                ];
+            });
+
+        return $this->mapCategorySummaries($groupedSummaries, $selectedCategory);
+    }
+
+    protected function mapCategorySummaries($groupedSummaries, string $selectedCategory = ''): array
+    {
+        $categories = TailorOrder::categories();
+        $categoryKeys = $selectedCategory !== '' ? [$selectedCategory] : array_keys($categories);
+
+        return collect($categoryKeys)
+            ->map(function (string $categoryKey) use ($categories, $groupedSummaries) {
+                $summary = $groupedSummaries->get($categoryKey);
+                $category = $categories[$categoryKey] ?? [
+                    'label' => ucfirst(str_replace('_', ' ', $categoryKey)),
+                    'price' => 0,
+                ];
+
+                return [
+                    'key' => $categoryKey,
+                    'label' => $category['label'],
+                    'quantity' => (int) ($summary->quantity_total ?? 0),
+                    'amount' => (float) ($summary->amount_total ?? 0),
+                    'unit_price' => (float) ($category['price'] ?? 0),
+                ];
+            })
+            ->values()
+            ->all();
     }
 }

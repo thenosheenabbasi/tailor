@@ -418,6 +418,69 @@ class TailorAccessTest extends TestCase
         $response->assertDontSee('INV-CAT-ADMIN-1');
     }
 
+    public function test_report_shows_category_wise_quantity_and_amount_summary_for_all_categories(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Bilal Tailor']);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-SUM-1',
+            'fatora_number' => 'FAT-SUM-1',
+            'thobe_category' => TailorOrder::CATEGORY_SIMPLE,
+            'quantity' => 2,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 20,
+            'total_price' => 40,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-SUM-2',
+            'fatora_number' => 'FAT-SUM-2',
+            'thobe_category' => TailorOrder::CATEGORY_DESIGN,
+            'quantity' => 3,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 30,
+            'total_price' => 90,
+        ]);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-SUM-3',
+            'fatora_number' => 'FAT-SUM-3',
+            'thobe_category' => TailorOrder::CATEGORY_EMBROIDERY,
+            'quantity' => 2,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 25,
+            'total_price' => 50,
+        ]);
+
+        $response = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'view' => 'report',
+            'assigned_user_id' => $assignedUser->id,
+        ]));
+
+        $response->assertOk();
+        $response->assertSee('All Categories Summary');
+        $response->assertSee('data-category-summary="simple"', false);
+        $response->assertSee('data-category-quantity="2"', false);
+        $response->assertSee('data-category-amount="40.00"', false);
+        $response->assertSee('data-category-summary="design"', false);
+        $response->assertSee('data-category-quantity="3"', false);
+        $response->assertSee('data-category-amount="90.00"', false);
+        $response->assertSee('data-category-summary="embroidery"', false);
+        $response->assertSee('data-category-amount="50.00"', false);
+        $response->assertSee('Total Thobes');
+        $response->assertSee('7');
+    }
+
     public function test_manager_can_filter_invoices_by_category(): void
     {
         $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
