@@ -924,10 +924,10 @@
                             <tr>
                                 <th>Invoice #</th>
                                 <th>Fatora #</th>
+                                <th>Date</th>
                                 <th>Category</th>
                                 <th>Qty</th>
                                 <th class="note-col">Note</th>
-                                <th>Date</th>
                                 <th>Status</th>
                                 <th>Total Amount</th>
                                 <th>View</th>
@@ -959,10 +959,10 @@
                                 <tr>
                                     <td>{{ $order->invoice_number }}</td>
                                     <td>{{ $order->fatora_number ?: 'N/A' }}</td>
+                                    <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
                                     <td>{{ $order->category_label }}</td>
                                     <td>{{ $order->quantity }}</td>
                                     <td class="note-cell">{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 70) }}</td>
-                                    <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
                                     <td>
                                         <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
                                             {{ $order->status_label }}
