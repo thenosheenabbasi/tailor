@@ -396,12 +396,23 @@
             min-width: 178px;
         }
 
+        .note-col {
+            min-width: 240px;
+        }
+
+        .note-cell {
+            min-width: 240px;
+            max-width: 320px;
+            white-space: normal;
+            line-height: 1.35;
+        }
+
         .subdued {
             color: #6b5b3c !important;
         }
 
         .details-cell {
-            min-width: 150px;
+            min-width: 96px;
         }
 
         .details-btn {
@@ -915,10 +926,11 @@
                                 <th>Fatora #</th>
                                 <th>Category</th>
                                 <th>Qty</th>
+                                <th class="note-col">Note</th>
                                 <th>Date</th>
                                 <th>Status</th>
                                 <th>Total Amount</th>
-                                <th>View Details</th>
+                                <th>View</th>
                                 @if ($canManageSettings && $pageMode !== 'report')
                                     <th>Actions</th>
                                 @endif
@@ -949,6 +961,7 @@
                                     <td>{{ $order->fatora_number ?: 'N/A' }}</td>
                                     <td>{{ $order->category_label }}</td>
                                     <td>{{ $order->quantity }}</td>
+                                    <td class="note-cell">{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 70) }}</td>
                                     <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
                                     <td>
                                         <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
@@ -964,7 +977,7 @@
                                             type="button"
                                             class="btn btn-outline-dark details-btn view-details-btn"
                                             data-order="{{ json_encode($detailPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }}">
-                                            View Details
+                                            View
                                         </button>
                                     </td>
                                     @if ($canManageSettings && $pageMode !== 'report')
@@ -1002,7 +1015,7 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 9 : 8 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
+                                    <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 10 : 9 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
                                 </tr>
                             @endforelse
                         </tbody>
