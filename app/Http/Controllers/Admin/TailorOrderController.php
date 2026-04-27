@@ -75,6 +75,13 @@ class TailorOrderController extends Controller
             return $this->downloadPdf(clone $ordersQuery, $filters, $selectedAssignedUser);
         }
 
+        $hasActiveReportFilters = $filters['thobe_category'] !== ''
+            || $filters['invoice_number'] !== ''
+            || $filters['fatora_number'] !== ''
+            || $filters['date_from'] !== ''
+            || $filters['date_to'] !== ''
+            || (! $user?->isUser() && $filters['assigned_user_id'] !== '');
+
         return view('admin.orders.index', [
             'orders' => $ordersQuery->paginate(10)->withQueryString(),
             'assignableUsers' => $user?->isUser()
@@ -92,6 +99,7 @@ class TailorOrderController extends Controller
                 'revenue' => (clone $filteredOrdersQuery)->revenueTotal(),
             ],
             'reportCategorySummaries' => $this->buildCategorySummaries(clone $filteredOrdersQuery, $filters['thobe_category']),
+            'hasActiveReportFilters' => $hasActiveReportFilters,
             'categories' => TailorOrder::categories(),
             'canManageSettings' => $canManageSettings,
             'canFilterTailors' => ! $user?->isUser(),

@@ -196,6 +196,13 @@
             line-height: 1.2;
         }
 
+        .category-summary-price {
+            color: #6b5b3c;
+            font-size: 0.72rem;
+            margin-top: 0.28rem;
+            font-weight: 600;
+        }
+
         .category-summary-qty {
             color: #b88719;
             font-size: 1.28rem;
@@ -214,9 +221,10 @@
 
         .category-summary-meta {
             color: #6b5b3c;
-            font-size: 0.72rem;
+            font-size: 0.54rem;
             text-transform: uppercase;
-            letter-spacing: 0.06em;
+            letter-spacing: 0.03em;
+            white-space: nowrap;
         }
 
         .category-summary-amount {
@@ -851,45 +859,35 @@
                     </form>
                 </div>
 
-                <div class="report-summary-section mb-4">
-                    <div class="category-summary-panel">
-                        <button
-                            type="button"
-                            class="category-summary-toggle"
-                            id="category-summary-toggle"
-                            aria-expanded="false"
-                            aria-controls="category-summary-body">
-                            <div>
-                                <h3 class="category-summary-title">
-                                    {{ $filters['thobe_category'] === '' ? 'All Categories Summary' : 'Selected Category Summary' }}
-                                </h3>
-                                <p class="category-summary-copy mb-0">
-                                    Quantity and amount are calculated based on the current report filters.
-                                </p>
-                            </div>
-                            <span class="category-summary-toggle-icon" aria-hidden="true">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                                    <path d="m6 9 6 6 6-6"/>
-                                </svg>
-                            </span>
-                        </button>
-
-                        <div class="category-summary-body" id="category-summary-body" hidden>
-                            <div class="category-summary-grid">
-                                @foreach ($reportCategorySummaries as $summary)
-                                    <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
-                                        <div class="category-summary-label">{{ $summary['label'] }}</div>
-                                        <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
-                                        <div class="category-summary-footer">
-                                            <div class="category-summary-meta">Total Thobes</div>
-                                            <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
+                @if ($hasActiveReportFilters)
+                    <div class="report-summary-section mb-4">
+                        <div class="category-summary-panel">
+                            <div class="category-summary-body" id="category-summary-body">
+                                <div class="mb-3">
+                                    <h3 class="category-summary-title mb-1">
+                                        {{ $filters['thobe_category'] === '' ? 'All Categories Summary' : 'Selected Category Summary' }}
+                                    </h3>
+                                    <p class="category-summary-copy mb-0">
+                                        Quantity and amount are calculated based on the current report filters.
+                                    </p>
+                                </div>
+                                <div class="category-summary-grid">
+                                    @foreach ($reportCategorySummaries as $summary)
+                                        <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
+                                            <div class="category-summary-label">{{ $summary['label'] }}</div>
+                                            <div class="category-summary-price">Single Price: {{ number_format($summary['unit_price'], 2) }} QAR</div>
+                                            <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
+                                            <div class="category-summary-footer">
+                                                <div class="category-summary-meta">Total Thobes</div>
+                                                <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
+                                            </div>
                                         </div>
-                                    </div>
-                                @endforeach
+                                    @endforeach
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
+                @endif
 
             @endif
 
@@ -1148,8 +1146,6 @@
             const detailsTitle = document.getElementById('order-details-title');
             const modalStatusForm = document.getElementById('modal-status-form');
             const modalStatusSelect = document.getElementById('modal-status-select');
-            const categorySummaryToggle = document.getElementById('category-summary-toggle');
-            const categorySummaryBody = document.getElementById('category-summary-body');
             const detailFields = detailsModal
                 ? Array.from(detailsModal.querySelectorAll('[data-detail]')).reduce((fields, field) => {
                     const key = field.dataset.detail;
@@ -1210,15 +1206,6 @@
             closeDetailsButtons.forEach((button) => {
                 button.addEventListener('click', closeDetailsModal);
             });
-
-            if (categorySummaryToggle && categorySummaryBody) {
-                categorySummaryToggle.addEventListener('click', () => {
-                    const isExpanded = categorySummaryToggle.getAttribute('aria-expanded') === 'true';
-
-                    categorySummaryToggle.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
-                    categorySummaryBody.hidden = isExpanded;
-                });
-            }
 
             document.addEventListener('keydown', (event) => {
                 if (event.key === 'Escape' && detailsModal && !detailsModal.hidden) {

@@ -319,6 +319,43 @@
             background: #fffdfa;
         }
 
+        .report-total-row td {
+            background: #2a2118;
+            color: #ffffff;
+            font-weight: bold;
+            border-top: 2px solid #c49a3f;
+        }
+
+        .signature-wrap {
+            margin-top: 24px;
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .signature-wrap td {
+            width: 50%;
+            vertical-align: top;
+            padding-top: 20px;
+        }
+
+        .signature-box {
+            width: 210px;
+            margin-left: auto;
+            text-align: center;
+        }
+
+        .signature-line {
+            border-top: 1px solid #6f6356;
+            margin-bottom: 6px;
+        }
+
+        .signature-label {
+            font-size: 10px;
+            color: #6f6356;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
         .amount {
             font-weight: bold;
             white-space: nowrap;
@@ -432,87 +469,45 @@
                 </tr>
             </table>
 
-            @php($categorySummaryChunks = collect($reportCategorySummaries)->chunk(3))
-
-            <div class="category-summary-section">
-                <div class="category-summary-header">
-                    <div class="category-summary-kicker">Category Overview</div>
-                    <div class="category-summary-title">{{ count($reportCategorySummaries) > 1 ? 'All Categories Breakdown' : 'Selected Category Breakdown' }}</div>
-                    <div class="category-summary-copy">Each card shows the total stitched thobes and total amount for the filtered report range.</div>
-                </div>
-
-                <table class="category-summary-grid">
-                    @foreach ($categorySummaryChunks as $summaryChunk)
-                        <tr>
-                            @foreach ($summaryChunk as $summary)
-                                <td>
-                                    <div class="category-summary-card {{ $summary['quantity'] === 0 ? 'category-summary-zero' : '' }}">
-                                        <table class="category-summary-top">
-                                            <tr>
-                                                <td class="category-summary-name">{{ $summary['label'] }}</td>
-                                                <td class="category-summary-rate">{{ number_format($summary['unit_price'], 2) }} QAR</td>
-                                            </tr>
-                                        </table>
-                                        <div class="category-summary-qty">{{ $summary['quantity'] }}</div>
-                                        <table class="category-summary-footer">
-                                            <tr>
-                                                <td class="category-summary-meta">Total Thobes</td>
-                                                <td class="category-summary-amount">{{ number_format($summary['amount'], 2) }} QAR</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-                                </td>
-                            @endforeach
-                            @for ($i = $summaryChunk->count(); $i < 3; $i++)
-                                <td class="category-summary-empty"></td>
-                            @endfor
-                        </tr>
-                    @endforeach
-                </table>
-            </div>
+            @php
+                $nonZeroCategorySummaries = collect($reportCategorySummaries)
+                    ->filter(fn (array $summary) => (int) $summary['quantity'] > 0)
+                    ->values();
+                $summaryTotalQuantity = (int) $nonZeroCategorySummaries->sum('quantity');
+                $summaryTotalAmount = (float) $nonZeroCategorySummaries->sum('amount');
+            @endphp
 
             <div class="report-wrap">
                 <table class="report-table">
                     <thead>
                         <tr>
-                            <th>Invoice #</th>
-                            <th>Fatora #</th>
                             <th>Category</th>
-                            <th>Qty</th>
-                            <th>Main Note</th>
-                            <th>Date</th>
+                            <th>Total Qty</th>
+                            <th>Rate</th>
                             <th>Total Amount</th>
-                            <th>Assigned Tailor</th>
-                            <th>Status</th>
-                            <th>Added By</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @forelse ($orders as $order)
+                        @forelse ($nonZeroCategorySummaries as $summary)
                             <tr>
-                                <td>{{ $order->invoice_number }}</td>
-                                <td>{{ $order->fatora_number ?: 'N/A' }}</td>
-                                <td>{{ $order->category_label }}</td>
-                                <td>{{ $order->quantity }}</td>
-                                <td>{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 70) }}</td>
-                                <td>{{ $order->order_date->format('d M Y h:i A') }}</td>
-                                <td class="amount">{{ number_format((float) $order->total_price, 2) }} QAR</td>
-                                <td>{{ $order->assignedUser?->name ?? 'Not assigned' }}</td>
-                                  <td>
-                                    <span class="status-badge {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'status-completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'status-in-progress' : 'status-pending') }}">
-                                        {{ $order->status_label }}
-                                    </span>
-                                    @if ($order->completed_at)
-                                        <span class="completed-at">{{ $order->completed_at->format('d M Y h:i A') }}</span>
-                                    @endif
-                                </td>
-                                <td>{{ $order->creator?->name ?? 'N/A' }}</td>
+                                <td>{{ $summary['label'] }}</td>
+                                <td>{{ $summary['quantity'] }}</td>
+                                <td>{{ number_format((float) $summary['unit_price'], 2) }} QAR</td>
+                                <td class="amount">{{ number_format((float) $summary['amount'], 2) }} QAR</td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="10" class="empty">No report data found for the selected filters.</td>
+                                <td colspan="4" class="empty">No report data found for the selected filters.</td>
                             </tr>
                         @endforelse
+                        @if ($nonZeroCategorySummaries->isNotEmpty())
+                            <tr class="report-total-row">
+                                <td>Total</td>
+                                <td>{{ $summaryTotalQuantity }}</td>
+                                <td></td>
+                                <td class="amount">{{ number_format($summaryTotalAmount, 2) }} QAR</td>
+                            </tr>
+                        @endif
                     </tbody>
                 </table>
             </div>
@@ -520,6 +515,18 @@
             <div class="footer-note">
                 Report generated by {{ $orders->first()?->creator?->name ?? 'System' }} on {{ $generatedAt->format('d F Y h:i A') }}.
             </div>
+
+            <table class="signature-wrap">
+                <tr>
+                    <td></td>
+                    <td>
+                        <div class="signature-box">
+                            <div class="signature-line"></div>
+                            <div class="signature-label">Authorized Signature</div>
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
     </div>
 </body>

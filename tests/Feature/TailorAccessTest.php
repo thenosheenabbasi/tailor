@@ -481,6 +481,43 @@ class TailorAccessTest extends TestCase
         $response->assertSee('7');
     }
 
+    public function test_report_category_summary_is_hidden_without_active_filters_and_visible_with_filters(): void
+    {
+        $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
+        $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Summary Filter User']);
+
+        TailorOrder::create([
+            'user_id' => $admin->id,
+            'assigned_user_id' => $assignedUser->id,
+            'tailor_name' => $assignedUser->name,
+            'invoice_number' => 'INV-SUM-FILTER-1',
+            'fatora_number' => 'FAT-SUM-FILTER-1',
+            'thobe_category' => TailorOrder::CATEGORY_EMBROIDERY,
+            'quantity' => 1,
+            'order_date' => now()->toDateString(),
+            'unit_price' => 25,
+            'total_price' => 25,
+        ]);
+
+        $unfilteredResponse = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'view' => 'report',
+        ]));
+
+        $unfilteredResponse->assertOk();
+        $unfilteredResponse->assertDontSee('All Categories Summary');
+        $unfilteredResponse->assertDontSee('Selected Category Summary');
+
+        $filteredResponse = $this->actingAs($admin)->get(route('admin.orders.index', [
+            'view' => 'report',
+            'thobe_category' => TailorOrder::CATEGORY_EMBROIDERY,
+        ]));
+
+        $filteredResponse->assertOk();
+        $filteredResponse->assertSee('Selected Category Summary');
+        $filteredResponse->assertSee('data-category-summary="embroidery"', false);
+        $filteredResponse->assertSee('data-category-amount="25.00"', false);
+    }
+
     public function test_manager_can_filter_invoices_by_category(): void
     {
         $manager = User::factory()->create(['role' => User::ROLE_MANAGER]);
