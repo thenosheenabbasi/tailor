@@ -754,17 +754,19 @@
                         </span>
                         <span class="sidebar-link-label">Dashboard</span>
                     </a>
-                    <a href="{{ $activeUser->canAccessOrderWorkspace() ? route('admin.orders.index', ['view' => 'invoices']) : route('dashboard') }}" class="sidebar-link {{ $isOrdersWorkspaceActive ? 'active' : '' }}">
-                        <span class="sidebar-link-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M8 3h8l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"></path>
-                                <path d="M16 3v5h5"></path>
-                                <path d="M9 13h6"></path>
-                                <path d="M9 17h6"></path>
-                            </svg>
-                        </span>
-                        <span class="sidebar-link-label">Tailor Entry</span>
-                    </a>
+                    @if ($activeUser->canAccessOrderWorkspace())
+                        <a href="{{ route('admin.orders.index', ['view' => 'invoices']) }}" class="sidebar-link {{ $isOrdersWorkspaceActive ? 'active' : '' }}">
+                            <span class="sidebar-link-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M8 3h8l4 4v12a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"></path>
+                                    <path d="M16 3v5h5"></path>
+                                    <path d="M9 13h6"></path>
+                                    <path d="M9 17h6"></path>
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-label">Tailor Entry</span>
+                        </a>
+                    @endif
                     <a href="{{ $activeUser->canAccessReports() ? route('admin.orders.index', ['view' => 'report']) : route('dashboard') }}" class="sidebar-link {{ $isReportsActive ? 'active' : '' }}">
                         <span class="sidebar-link-icon">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -776,16 +778,18 @@
                         </span>
                         <span class="sidebar-link-label">Reports</span>
                     </a>
-                    <a href="{{ $activeUser->canManageUsers() ? route('admin.users.index') : route('dashboard') }}" class="sidebar-link {{ $isUsersActive ? 'active' : '' }}">
-                        <span class="sidebar-link-icon">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
-                                <path d="M12 10v4"></path>
-                                <path d="M12 7h.01"></path>
-                            </svg>
-                        </span>
-                        <span class="sidebar-link-label">Access Control</span>
-                    </a>
+                    @if ($activeUser->canManageUsers())
+                        <a href="{{ route('admin.users.index') }}" class="sidebar-link {{ $isUsersActive ? 'active' : '' }}">
+                            <span class="sidebar-link-icon">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"></path>
+                                    <path d="M12 10v4"></path>
+                                    <path d="M12 7h.01"></path>
+                                </svg>
+                            </span>
+                            <span class="sidebar-link-label">Access Control</span>
+                        </a>
+                    @endif
                 </nav>
 
                 <form action="{{ route('logout') }}" method="POST" class="sidebar-logout">
