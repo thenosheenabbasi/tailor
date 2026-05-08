@@ -7,10 +7,25 @@ use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateUserRequest;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 class UserController extends Controller
 {
+    public function profile(): View
+    {
+        return view('admin.users.profile', [
+            'profileUser' => auth()->user(),
+        ]);
+    }
+
+    public function editProfile(): View
+    {
+        return view('admin.users.profile-edit', [
+            'profileUser' => auth()->user(),
+        ]);
+    }
+
     public function index(): View
     {
         abort_unless(auth()->user()?->canManageUsers(), 403, 'You are not authorized to access this section.');
@@ -98,5 +113,27 @@ class UserController extends Controller
         }
 
         return $redirect;
+    }
+
+    public function updateProfile(Request $request): RedirectResponse
+    {
+        /** @var User $profileUser */
+        $profileUser = $request->user();
+
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($profileUser->id)],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        if (($validated['password'] ?? '') === '') {
+            unset($validated['password']);
+        }
+
+        $profileUser->update($validated);
+
+        return redirect()
+            ->route('admin.users.profile')
+            ->with('status', 'Profile updated successfully.');
     }
 }

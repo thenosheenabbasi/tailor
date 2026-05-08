@@ -2,30 +2,99 @@
 
 @section('content')
     <style>
-        .access-shell {
-            border-radius: 1rem;
-            padding: 0.85rem 0.4rem 0.4rem;
-            background: #ffffff;
-            border: 1px solid rgba(193, 153, 80, 0.16);
+        .access-page {
+            display: grid;
+            gap: 1rem;
+            min-width: 0;
         }
 
-        .access-search {
-            max-width: 430px !important;
-            margin-left: auto;
+        .credentials-panel {
+            padding: 0.9rem;
+            background: #ffffff;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+            color: #111111;
+            box-shadow: 0 18px 36px rgba(17, 17, 17, 0.14);
+        }
+
+        .credentials-panel h2,
+        .credentials-panel .text-secondary,
+        .credentials-panel strong {
+            color: #111111 !important;
+        }
+
+        .credentials-code {
+            font-family: Consolas, Monaco, monospace;
+            font-size: 0.84rem;
+            background: #ffffff;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+            border-radius: 0.9rem;
+            padding: 0.85rem 0.95rem;
+            color: #111111;
+        }
+
+        .access-top-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.15rem;
+        }
+
+        .access-top-action .btn {
+            min-width: 180px;
+        }
+
+        .access-shell {
+            padding: 1rem;
+            max-width: 100%;
+            overflow: hidden;
+            background: #ffffff;
+            border-color: rgba(17, 17, 17, 0.08);
+            box-shadow: 0 10px 24px rgba(17, 17, 17, 0.08);
+        }
+
+        .access-toolbar {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(280px, 380px);
+            gap: 0.85rem;
+            align-items: end;
+            margin-bottom: 1rem;
+        }
+
+        .access-toolbar-title {
+            font-size: 0.9rem;
+            margin-bottom: 0.18rem;
+        }
+
+        .access-toolbar .text-secondary {
+            color: #a99e8f !important;
         }
 
         .access-search .form-control {
-            min-height: 48px;
-            padding-top: 0.6rem;
-            padding-bottom: 0.6rem;
-            border-radius: 4px !important;
+            min-height: 2.5rem;
+            padding-left: 1rem;
+            background: #ffffff;
+            border-color: rgba(17, 17, 17, 0.12);
+            color: var(--tailor-text);
+            box-shadow: none;
+            border-radius: 0.7rem !important;
+        }
+
+        .access-search .form-control::placeholder {
+            color: #8f8577;
+        }
+
+        .access-search .form-control:focus {
+            background: #ffffff;
+            border-color: rgba(17, 17, 17, 0.28);
+            box-shadow: 0 0 0 0.18rem rgba(17, 17, 17, 0.08);
         }
 
         .access-table-wrap {
             overflow-x: auto;
-            padding-bottom: 0.2rem;
+            overflow-y: hidden;
+            padding-bottom: 0.25rem;
             scrollbar-width: thin;
-            scrollbar-color: rgba(197, 150, 47, 0.65) rgba(197, 150, 47, 0.08);
+            scrollbar-color: rgba(181, 139, 59, 0.7) rgba(181, 139, 59, 0.08);
+            max-width: 100%;
         }
 
         .access-table-wrap::-webkit-scrollbar {
@@ -33,115 +102,585 @@
         }
 
         .access-table-wrap::-webkit-scrollbar-track {
-            background: rgba(197, 150, 47, 0.08);
+            background: rgba(181, 139, 59, 0.08);
             border-radius: 999px;
         }
 
         .access-table-wrap::-webkit-scrollbar-thumb {
-            background: linear-gradient(90deg, rgba(215, 167, 44, 0.95), rgba(184, 135, 25, 0.95));
+            background: linear-gradient(90deg, #d2b26d, #b58b3b);
             border-radius: 999px;
         }
 
         .access-table {
-            margin-bottom: 0;
             min-width: 920px;
+            margin-bottom: 0;
             border-collapse: separate;
             border-spacing: 0;
+            color: var(--tailor-text);
         }
 
         .access-table thead th {
+            padding: 0.82rem 0.95rem;
             color: #ffffff;
-            font-size: 0.84rem;
+            background: linear-gradient(180deg, #1a1a1a 0%, #111111 100%);
+            border-bottom: 1px solid rgba(215, 154, 30, 0.2);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
-            font-weight: 700;
-            background: #111111;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.14);
-            white-space: nowrap;
-            padding: 0.95rem 1rem;
-            vertical-align: middle;
         }
 
         .access-table thead th:first-child {
-            border-top-left-radius: 0.85rem;
+            border-top-left-radius: 1rem;
         }
 
         .access-table thead th:last-child {
-            border-top-right-radius: 0.85rem;
+            border-top-right-radius: 1rem;
         }
 
         .access-table tbody td {
-            color: #222222;
-            padding: 1.05rem 1rem;
-            border-bottom: 1px solid rgba(201, 166, 101, 0.22);
+            padding: 0.95rem 1rem;
+            color: var(--tailor-text);
+            background: #ffffff;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.08);
             vertical-align: middle;
-            background: rgba(255, 252, 245, 0.94);
+            font-size: 0.86rem;
+        }
+
+        .access-table tbody td:last-child {
+            text-align: center;
+        }
+
+        .access-table tbody tr:nth-child(even) td {
+            background: #fafafa;
         }
 
         .access-table tbody tr:hover td {
-            background: #fffaf1;
+            background: #f3f3f3;
         }
 
-        .access-table tbody td:nth-child(3),
-        .access-table tbody td:nth-child(4) {
-            white-space: nowrap;
+        .access-table tbody tr:hover td:first-child {
+            box-shadow: inset 3px 0 0 #111111;
+        }
+
+        .access-role {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.42rem 0.8rem;
+            border-radius: 0.45rem;
+            background: #f5f5f5;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+            font-size: 0.78rem;
+            text-transform: capitalize;
+            color: #111111;
         }
 
         .access-edit-btn {
-            min-width: 76px;
-            min-height: 40px;
-            border-radius: 10px !important;
-            border-color: rgba(200, 155, 44, 0.26) !important;
+            width: 3.15rem !important;
+            min-width: 3.15rem !important;
+            height: 3.15rem !important;
+            min-height: 3.15rem !important;
+            padding: 0 !important;
+            font-size: 0.82rem;
+            color: #111111 !important;
+            border: 1px solid rgba(17, 17, 17, 0.14) !important;
+            background: transparent !important;
+            border-radius: 0.9rem !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: none !important;
+            line-height: 1 !important;
+            opacity: 1 !important;
+        }
+
+        .access-edit-btn:hover,
+        .access-edit-btn:focus {
+            color: #111111 !important;
+            background: rgba(17, 17, 17, 0.03) !important;
+            border: 1px solid rgba(17, 17, 17, 0.18) !important;
+            box-shadow: none !important;
+        }
+
+        .access-edit-btn svg {
+            width: 2rem !important;
+            height: 2rem !important;
+            display: block;
+            color: #000000 !important;
+            stroke: #000000 !important;
+            fill: none !important;
+            stroke-width: 2.7;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 1 !important;
+            visibility: visible !important;
+        }
+
+        .access-table tbody .text-secondary {
+            color: #9c9182 !important;
+        }
+
+        .access-role.admin {
+            background: transparent;
+            border-color: rgba(17, 17, 17, 0.14);
+            color: #111111;
+        }
+
+        .access-role.manager {
+            background: #efefef;
+            border-color: rgba(17, 17, 17, 0.14);
+            color: #111111;
+        }
+
+        .access-role.user {
+            background: #f7f7f7;
+            border-color: rgba(17, 17, 17, 0.08);
+            color: #111111;
+        }
+
+        .access-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1050;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .access-modal.is-open {
+            display: flex;
+        }
+
+        .access-modal-backdrop {
+            position: absolute;
+            inset: 0;
+            background: rgba(12, 10, 8, 0.52);
+            backdrop-filter: blur(4px);
+        }
+
+        .access-modal-dialog {
+            position: relative;
+            width: min(100%, 860px);
+            padding: 0.95rem;
+            border-radius: 1rem;
             background: #ffffff;
+            border: 1px solid rgba(200, 155, 44, 0.16);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+        }
+
+        .access-modal-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.8rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .access-modal-title {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .access-modal-copy {
+            margin: 0.2rem 0 0;
+            color: var(--tailor-muted);
+            font-size: 0.82rem;
+        }
+
+        .access-modal-close {
+            width: 2.2rem;
+            height: 2.2rem;
+            border: 0;
+            border-radius: 999px;
+            background: transparent;
+            color: #40362b;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .account-modal-form {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .account-modal-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 0.8rem;
+            align-items: stretch;
+        }
+
+        .account-modal-grid > div {
+            min-width: 0;
+        }
+
+        .account-modal-card {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 100%;
+            padding: 0.85rem 0.95rem;
+            border-radius: 0.8rem;
+            background: #ffffff;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+        }
+
+        .account-modal-card h3 {
+            font-size: 0.96rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .account-modal-form .form-label {
+            margin-bottom: 0.35rem;
+            font-size: 0.68rem;
+            letter-spacing: 0.14em;
+        }
+
+        .account-modal-form .form-control,
+        .account-modal-form .form-select {
+            min-height: 2.7rem;
+            padding: 0.62rem 0.82rem;
+            font-size: 0.88rem;
+            border-radius: 0.8rem !important;
+        }
+
+        .password-field-wrap {
+            position: relative;
+        }
+
+        .password-toggle-btn {
+            position: absolute;
+            right: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.65rem;
+            height: 1.65rem;
+            padding: 0;
+            border: 0;
+            background: transparent;
+            color: #444444;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .password-toggle-btn svg {
+            width: 0.9rem;
+            height: 0.9rem;
+        }
+
+        .account-modal-submit {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            padding: 0.85rem 0.95rem;
+            border-radius: 0.8rem;
+            background: #ffffff;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+        }
+
+        .account-modal-submit .btn {
+            margin-left: auto;
+        }
+
+        .account-modal-submit .small {
+            font-size: 0.64rem;
+            letter-spacing: 0.12em;
+        }
+
+        .account-modal-submit .fw-semibold {
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 991.98px) {
+            .access-toolbar {
+                grid-template-columns: 1fr;
+            }
+
+            .account-modal-grid,
+            .account-modal-submit {
+                grid-template-columns: 1fr;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .account-modal-submit .btn,
+            .access-modal-dialog {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .access-top-action .btn {
+                width: 100%;
+                min-width: 0;
+            }
         }
     </style>
 
-    <div class="d-flex justify-content-end mb-4">
-        <a href="{{ route('admin.users.create') }}" class="btn btn-tailor rounded-4 px-4 py-3">Create New Tailor and Manager</a>
-    </div>
-
-    <div class="card-tailor rounded-4 p-4 p-lg-5 access-shell">
-        <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3 mb-4">
-            <div>
-                <h2 class="fw-bold mb-1">Access Control</h2>
-                <p class="text-secondary mb-0">Manage all system accounts, roles, and profile updates from one place.</p>
+    <div class="access-page">
+        @if (session('created_account_credentials'))
+            @php($createdAccount = session('created_account_credentials'))
+            <div class="credentials-panel">
+                <h2 class="fw-bold mb-1">New Account Credentials</h2>
+                <p class="text-secondary mb-3">These credentials are shown once after account creation or password update.</p>
+                <div class="credentials-code">
+                    <div><strong>Name:</strong> {{ $createdAccount['name'] }}</div>
+                    <div><strong>Email:</strong> {{ $createdAccount['email'] }}</div>
+                    <div><strong>Role:</strong> {{ ucfirst($createdAccount['role']) }}</div>
+                    <div><strong>Password:</strong> {{ $createdAccount['password'] }}</div>
+                </div>
             </div>
+        @endif
 
-            <form method="GET" action="{{ route('admin.users.index') }}" class="w-100 access-search" id="access-control-search-form">
-                <!-- <label for="search" class="form-label">Search</label> -->
-                <input type="text" id="search" name="search" value="{{ $filters['search'] }}" class="form-control" placeholder="Search by name, email, or role">
-            </form>
+        <div class="access-top-action">
+            <button type="button" class="btn btn-tailor px-4" data-open-access-modal="create-user-modal">Add New Account</button>
         </div>
 
-        <div class="table-responsive access-table-wrap">
-            <table class="table align-middle mb-0 access-table">
-                <thead>
-                    <tr>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th>Role</th>
-                        <th>Created</th>
-                        <th>Manage</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse ($users as $user)
+        <section class="card-tailor access-shell">
+            <div class="access-toolbar">
+                <div>
+                    <h3 class="access-toolbar-title">Account Directory</h3>
+                    <p class="text-secondary mb-0">Review all accounts, roles, and creation dates.</p>
+                </div>
+
+                <form method="GET" action="{{ route('admin.users.index') }}" class="access-search" id="access-control-search-form">
+                    <input type="text" id="search" name="search" value="{{ $filters['search'] }}" class="form-control" placeholder="Search by name, email, or role">
+                </form>
+            </div>
+
+            <div class="table-responsive access-table-wrap">
+                <table class="table align-middle access-table">
+                    <thead>
                         <tr>
-                            <td>{{ $user->name }}</td>
-                            <td>{{ $user->email }}</td>
-                            <td class="text-capitalize">{{ $user->role }}</td>
-                            <td>{{ $user->created_at?->format('d M Y') }}</td>
-                            <td>
-                                <a href="{{ route('admin.users.edit', $user) }}" class="btn btn-outline-dark px-3 py-2 access-edit-btn">Edit</a>
-                            </td>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Created</th>
+                            <th>Manage</th>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="text-center py-4 text-secondary">No users found.</td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        @forelse ($users as $user)
+                            <tr>
+                                <td class="fw-semibold">{{ $user->name }}</td>
+                                <td>{{ $user->email }}</td>
+                                <td><span class="access-role {{ $user->role }}">{{ $user->role }}</span></td>
+                                <td>{{ $user->created_at?->format('d M Y') }}</td>
+                                <td>
+                                    <button
+                                        type="button"
+                                        class="btn btn-outline-dark access-edit-btn"
+                                        data-open-access-modal="edit-user-modal"
+                                        data-user-id="{{ $user->id }}"
+                                        data-user-name="{{ $user->name }}"
+                                        data-user-email="{{ $user->email }}"
+                                        data-user-role="{{ $user->role }}"
+                                        aria-label="Edit {{ $user->name }}"
+                                        title="Edit {{ $user->name }}"
+                                    >
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M3 17.25V21h3.75L19.81 7.94l-3.75-3.75L3 17.25Z"></path>
+                                            <path d="m14.06 4.19 3.75 3.75"></path>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="text-center py-5 text-secondary">No users found.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <div class="access-modal" id="create-user-modal" aria-hidden="true">
+        <div class="access-modal-backdrop" data-close-access-modal></div>
+        <div class="access-modal-dialog">
+            <div class="access-modal-head">
+                <div>
+                    <h3 class="access-modal-title">Add New Account</h3>
+                    <p class="access-modal-copy">Create a new admin, manager, or user from Access Control.</p>
+                </div>
+                <button type="button" class="access-modal-close" aria-label="Close create account modal" data-close-access-modal>&times;</button>
+            </div>
+
+            <form action="{{ route('admin.users.store') }}" method="POST" class="account-modal-form">
+                @csrf
+                <input type="hidden" name="form_mode" value="create">
+
+                <div class="account-modal-grid">
+                    <div>
+                        <label for="create_name" class="form-label">Name</label>
+                        <input type="text" id="create_name" name="name" value="{{ old('form_mode') === 'create' ? old('name') : '' }}" class="form-control @error('name') is-invalid @enderror" required>
+                        @error('name')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="create_email" class="form-label">Email</label>
+                        <input type="email" id="create_email" name="email" value="{{ old('form_mode') === 'create' ? old('email') : '' }}" class="form-control @error('email') is-invalid @enderror" required>
+                        @error('email')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="create_role" class="form-label">Role</label>
+                        <select id="create_role" name="role" class="form-select @error('role') is-invalid @enderror" required>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role }}" @selected((old('form_mode') === 'create' ? old('role', \App\Models\User::ROLE_USER) : \App\Models\User::ROLE_USER) === $role)>{{ ucfirst($role) }}</option>
+                            @endforeach
+                        </select>
+                        @error('role')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="account-modal-card">
+                        <h3>Account Access</h3>
+                        <p class="text-secondary mb-0">Select the role first, then save the account. Credentials will still be shown once after creation.</p>
+                    </div>
+
+                    <div>
+                        <label for="create_password" class="form-label">Password</label>
+                        <div class="password-field-wrap">
+                            <input type="password" id="create_password" name="password" class="form-control pe-5 @error('password') is-invalid @enderror" required>
+                            <button type="button" class="password-toggle-btn" data-password-toggle="create_password" aria-label="Show password">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="create_password_confirmation" class="form-label">Confirm Password</label>
+                        <div class="password-field-wrap">
+                            <input type="password" id="create_password_confirmation" name="password_confirmation" class="form-control pe-5" required>
+                            <button type="button" class="password-toggle-btn" data-password-toggle="create_password_confirmation" aria-label="Show password confirmation">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-modal-submit">
+                    <div>
+                        <div class="small text-uppercase">Security Note</div>
+                        <div class="fw-semibold">Credentials remain generated and submitted exactly as before.</div>
+                    </div>
+                    <button type="submit" class="btn btn-tailor">Create Account</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="access-modal" id="edit-user-modal" aria-hidden="true">
+        <div class="access-modal-backdrop" data-close-access-modal></div>
+        <div class="access-modal-dialog">
+            <div class="access-modal-head">
+                <div>
+                    <h3 class="access-modal-title">Edit Account</h3>
+                    <p class="access-modal-copy">Edit basic account information, role assignment, and password access from one place.</p>
+                </div>
+                <button type="button" class="access-modal-close" aria-label="Close edit account modal" data-close-access-modal>&times;</button>
+            </div>
+
+            <form id="edit-user-form" action="{{ route('admin.users.update', old('edit_user_id', $users->first()?->id ?? 1)) }}" method="POST" class="account-modal-form">
+                @csrf
+                @method('PATCH')
+                <input type="hidden" name="form_mode" value="edit">
+                <input type="hidden" id="edit_user_id" name="edit_user_id" value="{{ old('edit_user_id') }}">
+
+                <div class="account-modal-grid">
+                    <div>
+                        <label for="edit_name" class="form-label">Name</label>
+                        <input type="text" id="edit_name" name="name" value="{{ old('form_mode') === 'edit' ? old('name') : '' }}" class="form-control @error('name') is-invalid @enderror" required>
+                        @error('name')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="edit_email" class="form-label">Email</label>
+                        <input type="email" id="edit_email" name="email" value="{{ old('form_mode') === 'edit' ? old('email') : '' }}" class="form-control @error('email') is-invalid @enderror" required>
+                        @error('email')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="edit_role" class="form-label">Role</label>
+                        <select id="edit_role" name="role" class="form-select @error('role') is-invalid @enderror" required>
+                            @foreach ($roles as $role)
+                                <option value="{{ $role }}" @selected(old('form_mode') === 'edit' && old('role') === $role)>{{ ucfirst($role) }}</option>
+                            @endforeach
+                        </select>
+                        @error('role')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="account-modal-card">
+                        <h3>Current Account</h3>
+                        <p class="mb-1 fw-semibold" id="edit_current_name">{{ old('form_mode') === 'edit' ? old('name') : '' }}</p>
+                        <p class="text-secondary mb-0" id="edit_current_email">{{ old('form_mode') === 'edit' ? old('email') : '' }}</p>
+                    </div>
+
+                    <div>
+                        <label for="edit_password" class="form-label">New Password</label>
+                        <div class="password-field-wrap">
+                            <input type="password" id="edit_password" name="password" class="form-control pe-5 @error('password') is-invalid @enderror" placeholder="Leave blank to keep current password">
+                            <button type="button" class="password-toggle-btn" data-password-toggle="edit_password" aria-label="Show password">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                        @error('password')
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div>
+                        <label for="edit_password_confirmation" class="form-label">Confirm New Password</label>
+                        <div class="password-field-wrap">
+                            <input type="password" id="edit_password_confirmation" name="password_confirmation" class="form-control pe-5" placeholder="Repeat new password">
+                            <button type="button" class="password-toggle-btn" data-password-toggle="edit_password_confirmation" aria-label="Show password confirmation">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6Z"/>
+                                    <circle cx="12" cy="12" r="3"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="account-modal-submit">
+                    <div>
+                        <div class="small text-uppercase">Update Summary</div>
+                        <div class="fw-semibold">Save updated account details and optional password changes.</div>
+                    </div>
+                    <button type="submit" class="btn btn-tailor">Update Account</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -149,6 +688,19 @@
         (() => {
             const form = document.getElementById('access-control-search-form');
             const searchInput = document.getElementById('search');
+            const createModal = document.getElementById('create-user-modal');
+            const editModal = document.getElementById('edit-user-modal');
+            const openButtons = document.querySelectorAll('[data-open-access-modal]');
+            const closeButtons = document.querySelectorAll('[data-close-access-modal]');
+            const editForm = document.getElementById('edit-user-form');
+            const editName = document.getElementById('edit_name');
+            const editEmail = document.getElementById('edit_email');
+            const editRole = document.getElementById('edit_role');
+            const editUserId = document.getElementById('edit_user_id');
+            const editCurrentName = document.getElementById('edit_current_name');
+            const editCurrentEmail = document.getElementById('edit_current_email');
+            const shouldOpenCreate = @json(old('form_mode') === 'create' && $errors->any());
+            const shouldOpenEdit = @json(old('form_mode') === 'edit' && $errors->any());
 
             if (!form) {
                 return;
@@ -160,6 +712,100 @@
                 window.clearTimeout(timeoutId);
                 timeoutId = window.setTimeout(() => form.submit(), 300);
             });
+
+            const openModal = (modal) => {
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.add('is-open');
+                modal.setAttribute('aria-hidden', 'false');
+                document.body.style.overflow = 'hidden';
+            };
+
+            const closeModal = (modal) => {
+                if (!modal) {
+                    return;
+                }
+
+                modal.classList.remove('is-open');
+                modal.setAttribute('aria-hidden', 'true');
+                document.body.style.overflow = '';
+            };
+
+            const setEditFormData = ({ userId, userName, userEmail, userRole }) => {
+                if (!editForm) {
+                    return;
+                }
+
+                const actionTemplate = @json(url('/admin/users'));
+                editForm.action = `${actionTemplate}/${userId}`;
+                if (editUserId) editUserId.value = userId ?? '';
+                if (editName) editName.value = userName ?? '';
+                if (editEmail) editEmail.value = userEmail ?? '';
+                if (editRole) editRole.value = userRole ?? 'user';
+                if (editCurrentName) editCurrentName.textContent = userName ?? '';
+                if (editCurrentEmail) editCurrentEmail.textContent = userEmail ?? '';
+            };
+
+            openButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    const modalId = button.dataset.openAccessModal;
+                    const modal = document.getElementById(modalId);
+
+                    if (modalId === 'edit-user-modal') {
+                        setEditFormData({
+                            userId: button.dataset.userId,
+                            userName: button.dataset.userName,
+                            userEmail: button.dataset.userEmail,
+                            userRole: button.dataset.userRole,
+                        });
+                    }
+
+                    openModal(modal);
+                });
+            });
+
+            closeButtons.forEach((button) => {
+                button.addEventListener('click', () => {
+                    closeModal(button.closest('.access-modal'));
+                });
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key !== 'Escape') {
+                    return;
+                }
+
+                closeModal(createModal);
+                closeModal(editModal);
+            });
+
+            document.querySelectorAll('[data-password-toggle]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    const input = document.getElementById(button.dataset.passwordToggle);
+
+                    if (!input) {
+                        return;
+                    }
+
+                    input.type = input.type === 'password' ? 'text' : 'password';
+                });
+            });
+
+            if (shouldOpenCreate) {
+                openModal(createModal);
+            }
+
+            if (shouldOpenEdit) {
+                setEditFormData({
+                    userId: @json(old('edit_user_id')),
+                    userName: @json(old('name')),
+                    userEmail: @json(old('email')),
+                    userRole: @json(old('role')),
+                });
+                openModal(editModal);
+            }
         })();
     </script>
 @endsection

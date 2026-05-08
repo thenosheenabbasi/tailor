@@ -1,25 +1,27 @@
-@extends('layouts.app', ['title' => 'Edit Account | Tailor'])
+@extends('layouts.app', ['title' => 'Edit Profile | Tailor'])
 
 @section('content')
     <style>
-        .manage-page {
-            max-width: 1020px;
+        .profile-edit-page {
+            max-width: 920px;
             margin: 0 auto;
+            display: grid;
+            gap: 0.9rem;
         }
 
-        .manage-shell {
+        .profile-edit-shell {
             padding: 0.9rem;
         }
 
-        .manage-header {
+        .profile-edit-header {
             display: grid;
-            grid-template-columns: minmax(0, 1.25fr) auto;
+            grid-template-columns: minmax(0, 1fr) auto;
             gap: 0.75rem;
             align-items: center;
             margin-bottom: 0.75rem;
         }
 
-        .manage-kicker {
+        .profile-edit-kicker {
             display: inline-flex;
             align-items: center;
             gap: 0.55rem;
@@ -29,38 +31,43 @@
             text-transform: uppercase;
         }
 
-        .manage-kicker::before {
+        .profile-edit-kicker::before {
             content: "";
             width: 2rem;
             height: 1px;
             background: linear-gradient(90deg, #d2b26d, transparent);
         }
 
-        .manage-title {
+        .profile-edit-title {
             margin: 0.25rem 0 0.2rem;
             font-size: clamp(1.25rem, 2.2vw, 1.7rem);
             line-height: 1.08;
         }
 
-        .manage-copy {
+        .profile-edit-copy {
             margin: 0;
             color: var(--tailor-muted);
-            max-width: 700px;
             font-size: 0.82rem;
+            max-width: 620px;
         }
 
-        .manage-grid {
+        .profile-edit-form {
+            display: grid;
+            gap: 0.85rem;
+        }
+
+        .profile-edit-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
             gap: 0.8rem;
             align-items: stretch;
         }
 
-        .manage-grid > div {
+        .profile-edit-grid > div {
             min-width: 0;
         }
 
-        .manage-card {
+        .profile-edit-card {
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -68,22 +75,21 @@
             padding: 0.85rem 0.95rem;
             border-radius: 0.8rem;
             background: #ffffff;
-            border: 1px solid rgba(17, 17, 17, 0.08);
+            border: 1px solid rgba(200, 155, 44, 0.14);
         }
 
-        .manage-card h3 {
+        .profile-edit-card h3 {
             font-size: 0.96rem;
             margin-bottom: 0.2rem;
         }
 
-        .manage-form .form-label {
+        .profile-edit-form .form-label {
             margin-bottom: 0.35rem;
             font-size: 0.68rem;
             letter-spacing: 0.14em;
         }
 
-        .manage-form .form-control,
-        .manage-form .form-select {
+        .profile-edit-form .form-control {
             min-height: 2.7rem;
             padding: 0.62rem 0.82rem;
             font-size: 0.88rem;
@@ -115,107 +121,98 @@
             height: 0.9rem;
         }
 
-        .manage-submit {
+        .profile-edit-submit {
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 0.8rem;
             padding: 0.85rem 0.95rem;
-            margin-top: 0.85rem;
             border-radius: 0.8rem;
             background: #ffffff;
             border: 1px solid rgba(17, 17, 17, 0.08);
         }
 
-        .manage-submit .btn {
+        .profile-edit-submit .btn {
             margin-left: auto;
             min-height: 2.45rem;
             padding: 0.5rem 1rem !important;
             font-size: 0.82rem;
         }
 
-        .manage-submit .small {
+        .profile-edit-submit .small {
             font-size: 0.64rem;
             letter-spacing: 0.12em;
         }
 
-        .manage-submit .fw-semibold {
+        .profile-edit-submit .fw-semibold {
             font-size: 0.88rem;
         }
 
-        .manage-header .btn {
+        .profile-edit-header .btn {
             min-height: 2.45rem;
             padding: 0.5rem 1rem !important;
             border-radius: 0.8rem !important;
             font-size: 0.8rem;
         }
 
-        @media (max-width: 991.98px) {
-            .manage-header,
-            .manage-grid,
-            .manage-submit {
+        @media (max-width: 767.98px) {
+            .profile-edit-header,
+            .profile-edit-grid,
+            .profile-edit-submit {
                 grid-template-columns: 1fr;
                 flex-direction: column;
                 align-items: flex-start;
             }
 
-            .manage-submit .btn,
-            .manage-header .btn {
+            .profile-edit-submit .btn,
+            .profile-edit-header .btn {
                 width: 100%;
                 margin-left: 0;
             }
         }
     </style>
 
-    <div class="manage-page">
-        <section class="card-tailor manage-shell">
-            <div class="manage-header">
+    <div class="profile-edit-page">
+        <section class="card-tailor profile-edit-shell">
+            <div class="profile-edit-header">
                 <div>
-                    <div class="manage-kicker">Manage Account</div>
-                    <h2 class="manage-title">Update team member details.</h2>
-                    <p class="manage-copy">Edit basic account information, role assignment, and password access from one place.</p>
+                    <div class="profile-edit-kicker">Edit Profile</div>
+                    <h2 class="profile-edit-title">Update your personal account details.</h2>
+                    <p class="profile-edit-copy">Change your name, email, and password here without going into Access Control.</p>
                 </div>
-                <a href="{{ route('admin.users.index') }}" class="btn btn-outline-dark px-4 py-3">Back to Access Control</a>
+                <a href="{{ route('admin.users.profile') }}" class="btn btn-outline-dark">Back to Profile</a>
             </div>
 
-            <form action="{{ route('admin.users.update', $managedUser) }}" method="POST" class="manage-form">
+            <form action="{{ route('admin.users.profile.update') }}" method="POST" class="profile-edit-form">
                 @csrf
                 @method('PATCH')
 
-                <div class="manage-grid">
+                <div class="profile-edit-grid">
                     <div>
                         <label for="name" class="form-label">Name</label>
-                        <input type="text" id="name" name="name" value="{{ old('name', $managedUser->name) }}" class="form-control @error('name') is-invalid @enderror" required>
+                        <input type="text" id="name" name="name" value="{{ old('name', $profileUser->name) }}" class="form-control @error('name') is-invalid @enderror" required>
                         @error('name')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
                     <div>
                         <label for="email" class="form-label">Email</label>
-                        <input type="email" id="email" name="email" value="{{ old('email', $managedUser->email) }}" class="form-control @error('email') is-invalid @enderror" required>
+                        <input type="email" id="email" name="email" value="{{ old('email', $profileUser->email) }}" class="form-control @error('email') is-invalid @enderror" required>
                         @error('email')
-                            <div class="invalid-feedback">{{ $message }}</div>
+                            <div class="invalid-feedback d-block">{{ $message }}</div>
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="role" class="form-label">Role</label>
-                        <select id="role" name="role" class="form-select @error('role') is-invalid @enderror" required>
-                            @foreach ($roles as $role)
-                                <option value="{{ $role }}" @selected(old('role', $managedUser->role) === $role)>{{ ucfirst($role) }}</option>
-                            @endforeach
-                        </select>
-                        @error('role')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div class="profile-edit-card">
+                        <h3>Current Role</h3>
+                        <p class="mb-0 text-secondary">{{ ucfirst($profileUser->role) }}</p>
                     </div>
 
-                    <div class="manage-card">
-                        <h3>Current Account</h3>
-                        <p class="mb-1 fw-semibold">{{ $managedUser->name }}</p>
-                        <p class="text-secondary mb-0">{{ $managedUser->email }}</p>
+                    <div class="profile-edit-card">
+                        <h3>Member Since</h3>
+                        <p class="mb-0 text-secondary">{{ $profileUser->created_at?->format('d M Y') ?? 'N/A' }}</p>
                     </div>
 
                     <div>
@@ -248,12 +245,12 @@
                     </div>
                 </div>
 
-                <div class="manage-submit">
+                <div class="profile-edit-submit">
                     <div>
-                        <div class="small text-uppercase">Update Summary</div>
-                        <div class="fw-semibold">Save updated account details and optional password changes.</div>
+                        <div class="small text-uppercase">Profile Update</div>
+                        <div class="fw-semibold">Save your personal details separately from Access Control.</div>
                     </div>
-                    <button type="submit" class="btn btn-tailor px-4 py-3">Update Account</button>
+                    <button type="submit" class="btn btn-tailor">Update Profile</button>
                 </div>
             </form>
         </section>

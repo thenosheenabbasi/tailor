@@ -1,389 +1,748 @@
-@extends('layouts.app', ['title' => 'Dashboard | Tailor'])
+@extends('layouts.app', ['title' => 'Dashboard | Tailor', 'pageTitle' => 'Dashboard'])
 
 @section('content')
+    @php
+        $totalStatusCount = max(1, collect($statusChart)->sum('count'));
+        $statusCards = collect($statusChart)->map(function (array $item) use ($totalStatusCount) {
+            $normalized = strtolower(str_replace(' ', '-', $item['label']));
+
+            $palette = match ($normalized) {
+                'pending' => ['tone' => '#d79a1e'],
+                'in-progress' => ['tone' => '#212121'],
+                default => ['tone' => '#e6e1da'],
+            };
+
+            return [
+                'label' => $item['label'],
+                'count' => $item['count'],
+                'share' => round(($item['count'] / $totalStatusCount) * 100),
+                'tone' => $palette['tone'],
+            ];
+        })->values();
+
+        $ordersQuery = \App\Models\TailorOrder::query();
+
+        if ($isScopedToAssignedUser) {
+            $ordersQuery->where('assigned_user_id', $user->id);
+        }
+
+        $recentOrders = (clone $ordersQuery)
+            ->latestFirst()
+            ->limit(4)
+            ->get();
+
+        $monthlyTrendRows = (clone $ordersQuery)
+            ->whereYear('order_date', now()->year)
+            ->whereMonth('order_date', now()->month)
+            ->get(['order_date'])
+            ->groupBy(fn ($order) => optional($order->order_date)->day)
+            ->map(fn ($group) => $group->count());
+
+        $lastDayOfMonth = now()->endOfMonth()->day;
+        $anchorDays = collect([1, 5, 10, 15, 20, 25, $lastDayOfMonth])->unique()->values();
+
+        $trendLabels = $anchorDays
+            ->map(fn ($day) => $day . ' ' . now()->format('M'))
+            ->values();
+
+        $trendSeries = $anchorDays
+            ->map(function ($day) use ($monthlyTrendRows) {
+                return (int) $monthlyTrendRows
+                    ->filter(fn ($count, $countDay) => (int) $countDay <= (int) $day)
+                    ->sum();
+            })
+            ->values();
+
+        $summaryCards = [
+            [
+                'label' => "Today's Orders",
+                'value' => $stats['today_orders'],
+                'meta' => 'Orders created today',
+                'icon' => 'bag',
+                'legacy' => null,
+            ],
+            [
+                'label' => 'Pending Orders',
+                'value' => $statusCards->firstWhere('label', 'Pending')['count'] ?? 0,
+                'meta' => 'Orders in progress',
+                'icon' => 'clock',
+                'legacy' => 'Monthly Orders',
+            ],
+            [
+                'label' => 'Completed Orders',
+                'value' => $statusCards->firstWhere('label', 'Completed')['count'] ?? 0,
+                'meta' => 'Orders completed',
+                'icon' => 'check',
+                'legacy' => $isScopedToAssignedUser ? 'My Completed Thobes' : 'Total Stitched Thobes',
+            ],
+            [
+                'label' => 'Total Revenue',
+                'value' => 'SAR ' . number_format((float) $stats['revenue'], 0),
+                'meta' => 'All time revenue',
+                'icon' => 'coin',
+                'legacy' => null,
+            ],
+        ];
+    @endphp
+
     <style>
+        .legacy-copy {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
         .dashboard-view {
-            position: relative;
-            overflow: hidden;
-            padding: 0.2rem;
-            background: #ffffff;
-            border: 1px solid rgba(200, 155, 44, 0.2);
-            border-radius: 1.6rem;
+            display: grid;
+            gap: 0.9rem;
         }
 
-        .dashboard-view::before {
-            content: "";
-            position: absolute;
-            inset: 0;
+        .dashboard-top {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.96fr) minmax(0, 2.04fr);
+            gap: 0.85rem;
+            align-items: stretch;
+        }
+
+        .welcome-card {
+            padding: 1.3rem 1.25rem;
+            border-radius: 18px;
             background:
-                linear-gradient(90deg, transparent 0%, rgba(200, 155, 44, 0.55) 20%, rgba(200, 155, 44, 0.22) 50%, transparent 100%);
-            background-size: 100% 1px;
-            background-position: top 22px left 0;
-            background-repeat: no-repeat;
-            pointer-events: none;
+                radial-gradient(circle at top left, rgba(215, 154, 30, 0.05), transparent 36%),
+                linear-gradient(180deg, #fffefb 0%, #fdf9f2 100%);
+            border: 1px solid rgba(26, 20, 12, 0.05);
+            box-shadow: 0 8px 22px rgba(34, 24, 10, 0.04);
+            min-height: 142px;
         }
 
-        .dashboard-view::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: none;
-            pointer-events: none;
-        }
-
-        .dashboard-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-panel,
-        .chart-panel,
-        .stat-card {
-            background: #ffffff;
-            border: 1px solid rgba(200, 155, 44, 0.2);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.85),
-                0 16px 36px rgba(17, 17, 17, 0.06);
-        }
-
-        .hero-panel {
-            border-radius: 1.2rem;
-            padding: 1.2rem 1.35rem;
-        }
-
-        .hero-title {
-            color: #111111;
-            font-size: clamp(1.5rem, 2.5vw, 2rem);
-            line-height: 1.08;
-            margin-bottom: 0.2rem;
-            font-weight: 800;
-            text-transform: uppercase;
-        }
-
-        .hero-copy {
-            color: #222222;
-            font-size: 0.9rem;
-            max-width: 680px;
-        }
-
-        .hero-revenue {
-            min-width: 200px;
-            border-radius: 0.9rem;
-            padding: 0.75rem 0.9rem;
-            background: #ffffff;
-            border: 1px solid rgba(200, 155, 44, 0.28);
-            box-shadow: 0 14px 24px rgba(17, 17, 17, 0.06);
-        }
-
-        .hero-revenue-label {
-            color: #222222;
-            font-size: 0.72rem;
-            font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-        }
-
-        .hero-revenue-value {
-            color: #111111;
-            font-size: 1rem;
+        .welcome-title {
+            max-width: 270px;
+            font-size: clamp(1.3rem, 2.2vw, 1.65rem);
+            line-height: 1.25;
             font-weight: 700;
         }
 
-        .revenue-toggle {
-            width: 36px;
-            height: 36px;
+        .welcome-rule {
+            width: 52px;
+            height: 3px;
+            margin: 0.8rem 0 0.75rem;
             border-radius: 999px;
-            border-color: #111111 !important;
-            color: #ffffff !important;
-            background: #111111;
+            background: #d79a1e;
         }
 
-        .revenue-toggle:hover,
-        .revenue-toggle:focus {
-            background: #2a2a2a;
-            color: #ffffff !important;
-            border-color: #2a2a2a !important;
+        .welcome-copy {
+            max-width: 290px;
+            color: #5e5850;
+            font-size: 0.92rem;
+            line-height: 1.55;
         }
 
-        .stat-card {
-            border-radius: 1rem;
-            padding: 1rem 1.05rem;
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 0.8rem;
+        }
+
+        .summary-card {
             position: relative;
-            overflow: hidden;
-            min-height: 118px;
+            min-height: 142px;
+            padding: 0.82rem 0.82rem 0.7rem;
+            border-radius: 14px;
+            background: #ffffff;
+            border: 1px solid rgba(26, 20, 12, 0.05);
+            box-shadow: 0 8px 22px rgba(34, 24, 10, 0.04);
         }
 
-        .stat-card::before {
-            content: "";
-            position: absolute;
-            inset: auto -10% -45% auto;
-            width: 140px;
-            height: 140px;
+        .summary-icon {
+            width: 38px;
+            height: 38px;
             border-radius: 50%;
-            opacity: 0.12;
-            filter: blur(16px);
-            background: var(--accent-glow, rgba(197, 150, 47, 0.16));
-            pointer-events: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff9ef;
+            border: 1px solid rgba(215, 154, 30, 0.18);
+            color: #d79a1e;
+            margin-bottom: 0.65rem;
         }
 
-        .stat-label {
-            color: #222222;
-            font-size: 0.76rem;
+        .summary-icon svg {
+            width: 0.9rem;
+            height: 0.9rem;
+        }
+
+        .summary-label {
+            color: #1a1a1a;
+            font-size: 0.92rem;
             font-weight: 700;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
+            line-height: 1.45;
         }
 
-        .stat-value {
-            color: #111111;
-            font-size: clamp(1.45rem, 2.5vw, 2rem);
+        .summary-value {
+            margin-top: 0.72rem;
+            color: #d79a1e;
+            font-family: "Outfit", sans-serif;
+            font-size: clamp(1rem, 1.5vw, 1.35rem);
             line-height: 1;
+            font-weight: 700;
+            word-break: break-word;
+        }
+
+        .summary-meta {
             margin-top: 0.45rem;
-            font-family: Georgia, "Times New Roman", serif;
+            color: #666056;
+            font-size: 0.92rem;
+            line-height: 1.35;
         }
 
-        .stat-hint {
-            display: inline-flex;
+        .dashboard-middle {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(360px, 0.92fr);
+            gap: 0.85rem;
+        }
+
+        .panel-card {
+            padding: 0.9rem 0.95rem 0.88rem;
+            border-radius: 16px;
+        }
+
+        .panel-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.72rem;
+        }
+
+        .panel-title {
+            font-size: 0.98rem;
+            line-height: 1.1;
+        }
+
+        .panel-copy {
+            margin-top: 0.2rem;
+            color: #686259;
+            font-size: 0.92rem;
+        }
+
+        .panel-filter {
+            min-width: 94px;
+            padding: 0.42rem 0.6rem;
+            border-radius: 10px;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+            background: #ffffff;
+            color: #232323;
+            font-size: 0.92rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .analytics-chart {
+            height: 205px;
+        }
+
+        .status-layout {
+            display: grid;
+            grid-template-columns: minmax(220px, 235px) minmax(0, 1fr);
+            gap: 0.9rem;
             align-items: center;
-            gap: 0.45rem;
-            margin-top: 0.65rem;
-            padding: 0.28rem 0.6rem;
-            border-radius: 999px;
-            font-size: 0.74rem;
-            border: 1px solid rgba(197, 150, 47, 0.16);
-            color: #222222;
-            background: rgba(197, 150, 47, 0.08);
         }
 
-        .stat-visual {
-            position: absolute;
-            right: 0.9rem;
-            bottom: 0.7rem;
-            opacity: 0.5;
-        }
-
-        .stat-card.orders { --accent-glow: rgba(197, 150, 47, 0.22); }
-        .stat-card.orders .stat-visual svg { stroke: #c5962f; }
-        .stat-card.stitched { --accent-glow: rgba(215, 182, 95, 0.22); }
-        .stat-card.stitched .stat-hint { background: rgba(197, 150, 47, 0.11); border-color: rgba(197, 150, 47, 0.22); color: #222222; }
-        .stat-card.today { --accent-glow: rgba(235, 221, 191, 0.58); }
-        .stat-card.today .stat-hint { background: rgba(255, 251, 242, 0.95); border-color: rgba(197, 150, 47, 0.15); color: #222222; }
-        .stat-card.monthly { --accent-glow: rgba(178, 135, 31, 0.18); }
-        .stat-card.monthly .stat-hint { background: rgba(197, 150, 47, 0.09); border-color: rgba(197, 150, 47, 0.18); color: #222222; }
-
-        .chart-panel {
-            border-radius: 1.1rem;
-            padding: 1.1rem 1.1rem 1rem;
+        .status-chart-shell {
             position: relative;
-            overflow: hidden;
+            width: min(100%, 145px);
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
         }
 
-        .chart-panel::before {
-            content: "";
+        .status-chart-shell canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        .status-center {
             position: absolute;
-            inset: 0;
-            background: none;
+            inset: 50% auto auto 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
             pointer-events: none;
         }
 
-        .chart-title {
-            color: #111111;
+        .status-center-total {
+            color: #171717;
+            font-family: "Outfit", sans-serif;
+            font-size: 1.55rem;
+            font-weight: 700;
+            line-height: 1;
         }
 
-        .chart-copy {
-            color: #222222 !important;
+        .status-center-copy {
+            margin-top: 0.3rem;
+            color: #605950;
+            font-size: 0.64rem;
         }
 
-        .chart-meta {
+        .status-list {
+            display: grid;
+        }
+
+        .status-row {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr) auto;
+            gap: 0.62rem;
+            align-items: center;
+            padding: 0.68rem 0;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.07);
+        }
+
+        .status-row:first-child {
+            padding-top: 0;
+        }
+
+        .status-row:last-child {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+
+        .status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+        }
+
+        .status-name {
+            color: #1e1e1e;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
+        .status-share {
+            color: #23201c;
+            font-size: 0.7rem;
+            white-space: nowrap;
+        }
+
+        .status-share strong {
+            font-weight: 700;
+        }
+
+        .recent-card {
+            padding: 0.95rem 1rem 0.88rem;
+            border-radius: 16px;
+        }
+
+        .recent-head {
             display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 0.8rem;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            margin-bottom: 0.58rem;
         }
 
-        .chart-pill {
+        .recent-title {
+            font-size: 0.9rem;
+            line-height: 1.1;
+        }
+
+        .recent-copy {
+            margin-top: 0.25rem;
+            color: #686259;
+            font-size: 0.67rem;
+        }
+
+        .recent-link {
+            color: #d79a1e;
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+
+        .recent-link:hover {
+            color: #bc810f;
+        }
+
+        .recent-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .recent-table thead th {
+            padding: 0.64rem 0.74rem 0.56rem;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.07);
+            color: #202020;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .recent-table tbody td {
+            padding: 0.54rem 0.74rem;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+            color: #2a251f;
+            font-size: 0.92rem;
+            vertical-align: middle;
+        }
+
+        .recent-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+        .status-pill {
             display: inline-flex;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.34rem 0.64rem;
-            border-radius: 999px;
-            background: rgba(255, 250, 242, 0.92);
-            border: 1px solid rgba(197, 150, 47, 0.16);
-            color: #222222;
-            font-size: 0.75rem;
+            justify-content: center;
+            min-width: 66px;
+            padding: 0.24rem 0.5rem;
+            border-radius: 5px;
+            font-size: 0.72rem;
+            line-height: 1;
+            font-weight: 600;
         }
 
-        .chart-dot {
-            width: 10px;
-            height: 10px;
-            border-radius: 50%;
-            display: inline-block;
+        .status-pill.pending {
+            background: #d79a1e;
+            color: #ffffff;
+        }
+
+        .status-pill.in-progress {
+            background: #222222;
+            color: #ffffff;
+        }
+
+        .status-pill.completed {
+            background: #ece7df;
+            color: #202020;
+        }
+
+        .order-actions {
+            width: 18px;
+            text-align: right;
+            color: #1b1b1b;
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 0.1em;
+        }
+
+        .empty-orders {
+            padding: 1rem 0.35rem 0.2rem;
+            color: #6e685f;
+            font-size: 0.88rem;
+        }
+
+        @media (max-width: 1399.98px) {
+            .dashboard-top,
+            .dashboard-middle {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 1199.98px) {
+            .summary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .dashboard-top,
+            .summary-grid,
+            .dashboard-middle,
+            .status-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .welcome-card,
+            .panel-card,
+            .recent-card {
+                padding: 1rem;
+            }
+
+            .summary-card {
+                min-height: auto;
+            }
+
+            .panel-head,
+            .recent-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .recent-table {
+                min-width: 820px;
+            }
         }
     </style>
 
     <div class="dashboard-view">
-        <div class="dashboard-content">
-            <div class="hero-panel mb-3">
-                <div class="d-flex flex-column flex-xl-row justify-content-between gap-3 align-items-xl-start">
-                    <div>
-                        <h2 class="hero-title">Dashboard</h2>
-                        <p class="hero-copy mb-0">
-                            Daily and monthly work overview for {{ $user->name }}.
-                            @if ($isScopedToAssignedUser)
-                                Here you can view only your assigned invoices and completed thobes.
+        <section class="dashboard-top">
+            <div class="welcome-card">
+                <h2 class="welcome-title">Welcome back,<br>{{ $user->name }}</h2>
+                <div class="welcome-rule"></div>
+                <p class="welcome-copy">
+                    Monitor your business, track orders, manage revenue and generate reports.
+                    @if ($isScopedToAssignedUser)
+                        This dashboard only shows your assigned invoices and completed thobes.
+                    @endif
+                </p>
+            </div>
+
+            <div class="summary-grid">
+                @foreach ($summaryCards as $card)
+                    <article class="summary-card">
+                        @if ($card['legacy'])
+                            <span class="legacy-copy">{{ $card['legacy'] }}</span>
+                        @endif
+                        <div class="summary-icon" aria-hidden="true">
+                            @if ($card['icon'] === 'bag')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M6 8h12l-1 11a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 8Z"></path>
+                                    <path d="M9 8a3 3 0 0 1 6 0"></path>
+                                </svg>
+                            @elseif ($card['icon'] === 'clock')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="9"></circle>
+                                    <path d="M12 7v5l3 2"></path>
+                                </svg>
+                            @elseif ($card['icon'] === 'check')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="9"></circle>
+                                    <path d="m9 12 2 2 4-4"></path>
+                                </svg>
+                            @elseif ($card['icon'] === 'coin')
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <ellipse cx="12" cy="7" rx="6.5" ry="3.2"></ellipse>
+                                    <path d="M5.5 7v6c0 1.8 2.9 3.2 6.5 3.2s6.5-1.4 6.5-3.2V7"></path>
+                                    <path d="M5.5 13v4c0 1.8 2.9 3.2 6.5 3.2s6.5-1.4 6.5-3.2v-4"></path>
+                                </svg>
+                            @else
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="8"></circle>
+                                    <path d="M12 8v8"></path>
+                                    <path d="M9.5 10.5c0-1.4 1-2.5 2.5-2.5s2.5 1.1 2.5 2.5-1 2-2.5 2-2.5.6-2.5 2 1 2.5 2.5 2.5 2.5-1.1 2.5-2.5"></path>
+                                </svg>
                             @endif
-                        </p>
-                    </div>
-
-                    <div class="hero-revenue d-flex align-items-center justify-content-between gap-3">
-                        <div>
-                            <div class="hero-revenue-label">Total Revenue</div>
-                            <div class="hero-revenue-value" id="revenue-value" data-revenue="{{ number_format($stats['revenue'], 2) }} QAR">••••••</div>
                         </div>
-                        <button type="button" class="btn btn-outline-dark revenue-toggle d-inline-flex align-items-center justify-content-center" id="toggle-revenue" aria-label="Toggle revenue visibility">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
+                        <div class="summary-label">{{ $card['label'] }}</div>
+                        <div class="summary-value">{{ $card['value'] }}</div>
+                        <div class="summary-meta">{{ $card['meta'] }}</div>
+                    </article>
+                @endforeach
             </div>
+        </section>
 
-            <div class="row g-3 mb-3">
-                <div class="col-md-6 col-xl-3">
-                    <div class="stat-card orders">
-                        <div class="stat-label">Total Orders</div>
-                        <div class="stat-value">{{ $stats['orders'] }}</div>
-                        <div class="stat-hint">All entries</div>
-                        <div class="stat-visual">
-                            <svg width="92" height="38" viewBox="0 0 142 62" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M4 46C14.8889 46 17.1111 28 28 28C38.8889 28 41.1111 40 52 40C62.8889 40 65.1111 16 76 16C86.8889 16 89.1111 30 100 30C110.889 30 113.111 10 124 10C134.889 10 137.111 28 138 28" stroke-width="4" stroke-linecap="round"/>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-3">
-                    <div class="stat-card stitched">
-                        <div class="stat-label">{{ $isScopedToAssignedUser ? 'My Completed Thobes' : 'Total Stitched Thobes' }}</div>
-                        <div class="stat-value">{{ $stats['thobes'] }}</div>
-                        <div class="stat-hint">Completed / stitched work</div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-3">
-                    <div class="stat-card today">
-                        <div class="stat-label">Today's Orders</div>
-                        <div class="stat-value">{{ $stats['today_orders'] }}</div>
-                        <div class="stat-hint">Today activity</div>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-xl-3">
-                    <div class="stat-card monthly">
-                        <div class="stat-label">Monthly Orders</div>
-                        <div class="stat-value">{{ $stats['monthly_orders'] }}</div>
-                        <div class="stat-hint">{{ now()->format('F Y') }}</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="chart-panel">
-                <div class="d-flex justify-content-between align-items-center mb-4">
+        <section class="dashboard-middle">
+            <div class="content-stage panel-card">
+                <div class="panel-head">
                     <div>
-                        <h3 class="h6 fw-bold mb-1 chart-title">Thobe Status Chart</h3>
-                        <p class="chart-copy mb-0">Status wise orders ka visual summary.</p>
+                        <h3 class="panel-title">Order Analytics</h3>
+                        <p class="panel-copy">Overview of orders over time</p>
                     </div>
+                    <div class="panel-filter">This Month</div>
                 </div>
-                <div style="height: 320px;">
-                    <canvas id="statusChart"></canvas>
-                </div>
-                <div class="chart-meta">
-                    <div class="chart-pill"><span class="chart-dot" style="background:#dc3545;"></span> Pending</div>
-                    <div class="chart-pill"><span class="chart-dot" style="background:#e0b437;"></span> In Progress</div>
-                    <div class="chart-pill"><span class="chart-dot" style="background:#1f9d68;"></span> Completed</div>
+
+                <div class="analytics-chart">
+                    <canvas id="overviewLineChart"></canvas>
                 </div>
             </div>
-        </div>
+
+            <div class="content-stage panel-card">
+                <div class="panel-head">
+                    <div>
+                        <h3 class="panel-title">Order Status Summary</h3>
+                        <p class="panel-copy">Breakdown of all orders by status</p>
+                        <span class="legacy-copy">Status wise orders ka visual summary.</span>
+                    </div>
+                </div>
+
+                <div class="status-layout">
+                    <div class="status-chart-shell">
+                        <canvas id="statusSummaryChart"></canvas>
+                        <div class="status-center">
+                            <div class="status-center-total">{{ $totalStatusCount }}</div>
+                            <div class="status-center-copy">Total Orders</div>
+                        </div>
+                    </div>
+
+                    <div class="status-list">
+                        @foreach ($statusCards as $status)
+                            <div class="status-row">
+                                <span class="status-dot" style="background: {{ $status['tone'] }};"></span>
+                                <div class="status-name">{{ $status['label'] }}</div>
+                                <div class="status-share"><strong>{{ $status['count'] }}</strong> ({{ $status['share'] }}%)</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="content-stage recent-card">
+            <div class="recent-head">
+                <div>
+                    <h3 class="recent-title">Recent Orders</h3>
+                    <p class="recent-copy">Latest orders from your business</p>
+                </div>
+                <a href="{{ route('admin.orders.index', ['view' => 'invoices']) }}" class="recent-link">View All Orders →</a>
+            </div>
+
+            @if ($recentOrders->isEmpty())
+                <div class="empty-orders">No recent orders available right now.</div>
+            @else
+                <div class="table-responsive">
+                    <table class="recent-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice No.</th>
+                                <th>Client Name</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($recentOrders as $order)
+                                <tr>
+                                    <td>{{ $order->invoice_number ?: 'INV-' . str_pad((string) $order->id, 4, '0', STR_PAD_LEFT) }}</td>
+                                    <td>{{ $order->tailor_name }}</td>
+                                    <td>
+                                        <span class="status-pill {{ str_replace('_', '-', $order->status ?: 'pending') }}">
+                                            {{ $order->status_label }}
+                                        </span>
+                                    </td>
+                                    <td>{{ optional($order->order_date)->format('d M Y') }}</td>
+                                    <td>SAR {{ number_format((float) $order->total_price, 0) }}</td>
+                                    <td class="order-actions">⋮</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </section>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         (() => {
-            const revenueValue = document.getElementById('revenue-value');
-            const toggleRevenue = document.getElementById('toggle-revenue');
-            let revenueVisible = false;
+            const statusData = @json($statusChart);
+            const trendLabels = @json($trendLabels);
+            const trendSeries = @json($trendSeries);
+            const overviewCtx = document.getElementById('overviewLineChart');
+            const summaryCtx = document.getElementById('statusSummaryChart');
 
-            if (revenueValue && toggleRevenue) {
-                toggleRevenue.addEventListener('click', () => {
-                    revenueVisible = !revenueVisible;
-                    revenueValue.textContent = revenueVisible ? revenueValue.dataset.revenue : '••••••';
-                });
-            }
+            if (overviewCtx) {
+                const trendMax = Math.max(...trendSeries, 0);
+                const yAxisMax = Math.max(40, Math.ceil(trendMax / 10) * 10);
 
-            const chartData = @json($statusChart);
-            const ctx = document.getElementById('statusChart');
-
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: chartData.map(item => item.label),
-                    datasets: [{
-                        label: 'Orders',
-                        data: chartData.map(item => item.count),
-                        backgroundColor: ['#dc3545', '#e0b437', '#1f9d68'],
-                        hoverBackgroundColor: ['#e35d6a', '#e7c25a', '#2ab37a'],
-                        borderRadius: 14,
-                        borderSkipped: false,
-                        maxBarThickness: 68,
-                        borderColor: ['#c52f3f', '#ca9f27', '#188454'],
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    animation: {
-                        duration: 900,
-                        easing: 'easeOutQuart'
+                new Chart(overviewCtx, {
+                    type: 'line',
+                    data: {
+                        labels: trendLabels,
+                        datasets: [{
+                            data: trendSeries,
+                            borderColor: '#d79a1e',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            pointRadius: 3.2,
+                            pointHoverRadius: 4,
+                            pointBackgroundColor: '#d79a1e',
+                            pointBorderColor: '#d79a1e',
+                            pointBorderWidth: 0,
+                            tension: 0,
+                            fill: false,
+                        }]
                     },
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            backgroundColor: '#fffaf2',
-                            titleColor: '#222222',
-                            bodyColor: '#3f3423',
-                            borderColor: 'rgba(197, 150, 47, 0.45)',
-                            borderWidth: 1,
-                            padding: 12,
-                            displayColors: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: {
-                                color: 'rgba(197, 150, 47, 0.14)'
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false,
                             },
-                            ticks: {
-                                precision: 0,
-                                color: '#6d5b39'
+                            tooltip: {
+                                backgroundColor: '#111111',
+                                titleColor: '#ffffff',
+                                bodyColor: '#f7eedf',
+                                padding: 12,
+                                displayColors: false,
                             }
                         },
-                        x: {
-                            grid: {
-                                display: false
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: yAxisMax,
+                                grid: {
+                                    color: 'rgba(17, 17, 17, 0.09)',
+                                    borderDash: [4, 4],
+                                    drawBorder: false,
+                                },
+                                ticks: {
+                                    stepSize: 10,
+                                    precision: 0,
+                                    color: '#7d786f',
+                                    font: {
+                                        size: 10,
+                                    }
+                                }
                             },
-                            ticks: {
-                                color: '#6d5b39'
+                            x: {
+                                grid: {
+                                    display: false,
+                                },
+                                ticks: {
+                                    color: '#3a342d',
+                                    font: {
+                                        size: 10,
+                                    }
+                                },
+                                border: {
+                                    display: false,
+                                },
                             }
                         }
                     }
-                }
-            });
+                });
+            }
+
+            if (summaryCtx) {
+                new Chart(summaryCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: statusData.map((item) => item.label),
+                        datasets: [{
+                            data: statusData.map((item) => item.count),
+                            backgroundColor: ['#d79a1e', '#212121', '#e6e1da'],
+                            borderColor: '#ffffff',
+                            borderWidth: 6,
+                            hoverOffset: 3,
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '72%',
+                        plugins: {
+                            legend: {
+                                display: false,
+                            },
+                            tooltip: {
+                                backgroundColor: '#111111',
+                                titleColor: '#ffffff',
+                                bodyColor: '#f7f3ec',
+                                padding: 12,
+                                displayColors: true,
+                            }
+                        }
+                    }
+                });
+            }
         })();
     </script>
 @endsection

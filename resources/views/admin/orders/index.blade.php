@@ -1,128 +1,271 @@
 @extends('layouts.app', ['title' => ($pageMode === 'report' ? 'Report' : 'Tailor Invoice') . ' | Tailor'])
 
 @section('content')
+    @php
+        $visibleOrderCount = $orders->count();
+        $visibleOrderAmount = $orders->sum('total_price');
+    @endphp
+
     <style>
         .orders-view {
-            position: relative;
-            overflow: hidden;
-            padding: 0.25rem;
-            background: #ffffff;
-            border: 1px solid rgba(200, 155, 44, 0.2);
-            border-radius: 1.6rem;
-        }
-
-        .orders-view::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-                linear-gradient(90deg, transparent 0%, rgba(197, 150, 47, 0.85) 20%, rgba(197, 150, 47, 0.45) 50%, transparent 100%),
-                linear-gradient(90deg, transparent 0%, rgba(197, 150, 47, 0.7) 28%, rgba(197, 150, 47, 0.35) 56%, transparent 100%),
-                linear-gradient(90deg, transparent 0%, rgba(197, 150, 47, 0.5) 32%, rgba(197, 150, 47, 0.28) 60%, transparent 100%);
-            background-size: 100% 2px, 100% 2px, 100% 2px;
-            background-position: top 18px left 0, top 26px left 0, top 34px left 0;
-            background-repeat: no-repeat;
-            pointer-events: none;
-        }
-
-        .orders-view::after {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background:
-                radial-gradient(circle at top right, rgba(197, 150, 47, 0.12), transparent 22%),
-                radial-gradient(circle at left center, rgba(241, 226, 193, 0.22), transparent 24%);
-            pointer-events: none;
+            display: grid;
+            gap: 1rem;
+            min-width: 0;
         }
 
         .orders-content {
-            position: relative;
-            z-index: 1;
+            display: grid;
+            gap: 1rem;
+            min-width: 0;
+        }
+
+        .orders-top-action {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 0.2rem;
+        }
+
+        .create-tailor-btn {
+            border-color: #111111 !important;
+            background: #111111 !important;
+            color: #ffffff !important;
+            border-radius: 10px !important;
+        }
+
+        .create-tailor-btn:hover,
+        .create-tailor-btn:focus {
+            border-color: #111111 !important;
+            background: #111111 !important;
+            color: #ffffff !important;
+        }
+
+        .legacy-copy {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
 
         .hero-panel,
         .table-card,
         .stat-card,
-        .report-toolbar {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(252, 250, 245, 0.97));
-            border: 1px solid rgba(200, 155, 44, 0.2);
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.85),
-                0 16px 36px rgba(17, 17, 17, 0.06);
+        .report-toolbar,
+        .category-summary-panel {
+            border-radius: 1rem;
+            background: #1b1b1b;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
         }
 
         .hero-panel {
-            border-radius: 1.8rem;
-            padding: 1.2rem 1.45rem 1rem;
+            padding: 1.15rem 1.2rem;
+        }
+
+        .hero-kicker {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: #8f897f;
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            margin-bottom: 0.45rem;
+        }
+
+        .hero-kicker::before {
+            content: "";
+            width: 2rem;
+            height: 1px;
+            background: linear-gradient(90deg, #d2b26d, transparent);
         }
 
         .hero-title {
-            color: #111111;
-            font-size: clamp(1.7rem, 3vw, 2.4rem);
-            line-height: 1;
-            margin-bottom: 0.25rem;
+            font-size: clamp(1.45rem, 2vw, 1.8rem);
+            line-height: 1.1;
+            margin-bottom: 0.3rem;
         }
 
         .hero-copy {
-            color: #222222;
-            font-size: 0.92rem;
-            max-width: 760px;
+            color: var(--tailor-muted);
+            font-size: 0.9rem;
+            max-width: 700px;
         }
 
-        .hero-action .btn-tailor {
-            min-width: 230px;
-            min-height: 58px;
-            border-radius: 10px;
-            box-shadow: 0 0 22px rgba(215, 167, 44, 0.35);
-            display: inline-flex;
+        .hero-action .btn-tailor,
+        .table-toolbar .btn-tailor {
+            min-width: 190px;
+            min-height: 2.5rem;
+            font-size: 0.88rem;
+        }
+
+        .table-toolbar {
+            display: flex;
+            justify-content: flex-end;
             align-items: center;
-            justify-content: center;
-            text-align: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-toolbar,
+        .category-summary-panel {
+            padding: 1rem;
+        }
+
+        .report-workspace {
+            display: grid;
+            grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+            gap: 1rem;
+            align-items: start;
+        }
+
+        .report-sidebar {
+            display: grid;
+            gap: 1rem;
+            position: sticky;
+            top: 96px;
+            align-self: start;
+        }
+
+        .report-results-card {
+            min-width: 0;
         }
 
         .report-toolbar {
-            border-radius: 1rem;
-            padding: 1rem 1.1rem;
+            padding: 1rem 1.05rem;
         }
 
-        .report-toolbar .form-label {
-            font-size: 0.78rem;
-            margin-bottom: 0.45rem;
-            letter-spacing: 0.06em;
-            text-transform: uppercase;
+        .report-toolbar-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.85rem;
+            margin-bottom: 0.9rem;
+        }
+
+        .report-toolbar-head .btn {
+            min-width: 0;
+            flex-shrink: 0;
+        }
+
+        .report-toolbar-actions {
+            display: flex;
+            justify-content: flex-start;
+        }
+
+        .report-download-icon {
+            width: 2.6rem;
+            height: 2.6rem;
+            min-height: 2.6rem !important;
+            min-width: 2.6rem !important;
+            padding: 0 !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent !important;
+            border: 1px solid rgba(190, 129, 16, 0.34) !important;
+            box-shadow: none !important;
+            color: #b67c12 !important;
+            border-radius: 0.7rem !important;
+            flex: 0 0 auto;
+        }
+
+        .report-download-icon svg {
+            width: 1.1rem !important;
+            height: 1.1rem !important;
+            display: block;
+            stroke: currentColor;
+            stroke-width: 2.3;
+            flex: 0 0 auto;
+        }
+
+        .report-download-icon:hover,
+        .report-download-icon:focus {
+            background: rgba(215, 154, 30, 0.12) !important;
+            border: 1px solid rgba(190, 129, 16, 0.42) !important;
+            box-shadow: none !important;
+            color: #8f620d !important;
+            opacity: 1;
+        }
+
+        .report-toolbar-title {
+            color: var(--tailor-white);
+            font-size: 1rem;
             font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 0.18rem;
+        }
+
+        .report-toolbar-copy {
+            color: var(--tailor-muted);
+            font-size: 0.6rem;
+            margin: 0;
+            line-height: 1.25;
+        }
+
+        .report-filter-form {
+            --bs-gutter-x: 0;
+            --bs-gutter-y: 0;
+            display: grid;
+            gap: 0.8rem;
+        }
+
+        .report-filter-col {
+            display: grid;
+            gap: 0.42rem;
+            width: 100%;
+        }
+
+        .report-toolbar .report-filter-form > [class*="col-"] {
+            width: 100%;
+            max-width: 100%;
+            flex: 0 0 100%;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        .report-filter-col .form-label {
+            margin-bottom: 0;
+        }
+
+        .report-toolbar .form-control,
+        .report-toolbar .form-select,
+        .report-toolbar .btn {
+            min-height: 2.7rem;
         }
 
         .report-toolbar .form-control,
         .report-toolbar .form-select {
-            min-height: 46px;
-            border-radius: 0.7rem !important;
-            padding-top: 0.45rem;
-            padding-bottom: 0.45rem;
-        }
-
-        .report-toolbar .btn {
-            border-radius: 0.7rem !important;
-            min-height: 44px;
+            border-radius: 0.9rem !important;
+            background: rgba(255, 255, 255, 0.04);
+            border-color: rgba(255, 255, 255, 0.08);
+            padding-inline: 0.9rem;
         }
 
         .report-filter-actions {
-            min-width: 132px;
+            display: flex;
+            align-items: stretch;
+            justify-content: stretch;
+            flex-wrap: nowrap;
+            gap: 0.65rem;
+        }
+
+        .report-filter-actions .btn {
+            flex: 1 1 50%;
+            min-width: 0;
+        }
+
+        .report-filter-actions .btn-outline-secondary {
+            background: transparent;
         }
 
         .report-summary-section {
             display: grid;
-            gap: 0.85rem;
-        }
-
-        .category-summary-panel {
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(252, 250, 245, 0.97));
-            border: 1px solid rgba(200, 155, 44, 0.2);
-            border-radius: 1.35rem;
-            box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.85),
-                0 16px 36px rgba(17, 17, 17, 0.06);
-            padding: 1rem 1.05rem;
+            gap: 1rem;
         }
 
         .category-summary-toggle {
@@ -138,15 +281,15 @@
         }
 
         .category-summary-toggle-icon {
-            width: 34px;
-            height: 34px;
+            width: 2.5rem;
+            height: 2.5rem;
             border-radius: 999px;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid rgba(200, 155, 44, 0.24);
-            color: #111111;
-            background: rgba(255, 252, 245, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            color: var(--tailor-white);
+            background: #232323;
             flex-shrink: 0;
             transition: transform 0.18s ease;
         }
@@ -160,15 +303,15 @@
         }
 
         .category-summary-title {
-            color: #111111;
-            font-size: 0.96rem;
+            color: var(--tailor-white);
+            font-size: 1.15rem;
             font-weight: 700;
             margin-bottom: 0.12rem;
         }
 
         .category-summary-copy {
-            color: #6b5b3c;
-            font-size: 0.82rem;
+            color: var(--tailor-muted);
+            font-size: 0.86rem;
         }
 
         .category-summary-grid {
@@ -179,10 +322,10 @@
         }
 
         .category-summary-card {
-            border-radius: 0.85rem;
-            border: 1px solid rgba(200, 155, 44, 0.18);
-            background: rgba(255, 252, 245, 0.92);
-            padding: 0.8rem 0.85rem;
+            border-radius: 1.1rem;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            background: #222222;
+            padding: 1rem;
             min-height: 96px;
             display: flex;
             flex-direction: column;
@@ -190,21 +333,21 @@
         }
 
         .category-summary-label {
-            color: #111111;
+            color: var(--tailor-white);
             font-size: 0.84rem;
             font-weight: 700;
             line-height: 1.2;
         }
 
         .category-summary-price {
-            color: #6b5b3c;
+            color: var(--tailor-muted);
             font-size: 0.72rem;
             margin-top: 0.28rem;
             font-weight: 600;
         }
 
         .category-summary-qty {
-            color: #b88719;
+            color: var(--tailor-gold);
             font-size: 1.28rem;
             line-height: 1;
             margin-top: 0.45rem;
@@ -220,7 +363,7 @@
         }
 
         .category-summary-meta {
-            color: #6b5b3c;
+            color: var(--tailor-muted);
             font-size: 0.54rem;
             text-transform: uppercase;
             letter-spacing: 0.03em;
@@ -228,7 +371,7 @@
         }
 
         .category-summary-amount {
-            color: #111111;
+            color: var(--tailor-white);
             font-size: 0.9rem;
             font-weight: 700;
             line-height: 1;
@@ -236,9 +379,9 @@
         }
 
         .stat-card {
-            border-radius: 1.35rem;
-            padding: 1rem 1.1rem;
-            min-height: 108px;
+            border-radius: 1.55rem;
+            padding: 1rem 1.05rem;
+            min-height: 122px;
             position: relative;
             overflow: hidden;
         }
@@ -256,43 +399,47 @@
             pointer-events: none;
         }
 
-        .stat-card.orders { --stat-glow: rgba(76, 126, 219, 0.24); }
-        .stat-card.thobes { --stat-glow: rgba(215, 167, 44, 0.22); }
-        .stat-card.revenue { --stat-glow: rgba(31, 157, 104, 0.24); }
+        .stat-card.orders { --stat-glow: rgba(210, 178, 109, 0.28); }
+        .stat-card.thobes { --stat-glow: rgba(181, 139, 59, 0.22); }
+        .stat-card.revenue { --stat-glow: rgba(13, 13, 13, 0.16); }
 
         .stat-label {
-            color: #222222;
-            font-size: 0.76rem;
+            color: #8f897f;
+            font-size: 0.74rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.18em;
             font-weight: 700;
         }
 
         .stat-value {
-            color: #111111;
-            font-size: clamp(1.8rem, 3vw, 2.45rem);
+            color: var(--tailor-white);
+            font-size: clamp(1.55rem, 2.8vw, 2.1rem);
             line-height: 1;
-            margin-top: 0.5rem;
+            margin-top: 0.35rem;
             font-family: Georgia, "Times New Roman", serif;
         }
 
         .stat-value.revenue {
-            color: #d7a72c;
-            font-size: clamp(1.55rem, 3vw, 2.15rem);
+            color: var(--tailor-gold);
+            font-size: clamp(1.35rem, 2.6vw, 1.8rem);
         }
 
         .table-card {
             border-radius: 1rem;
-            padding: 0.85rem 0.4rem 0.4rem;
-            background: #ffffff;
-            border: 1px solid rgba(193, 153, 80, 0.16);
+            padding: 1rem;
+            background: #1b1b1b;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            max-width: 100%;
+            overflow: hidden;
         }
 
         .table-card .table-responsive {
             overflow-x: auto;
+            overflow-y: hidden;
             padding-bottom: 0.2rem;
             scrollbar-width: thin;
             scrollbar-color: rgba(197, 150, 47, 0.65) rgba(197, 150, 47, 0.08);
+            max-width: 100%;
         }
 
         .table-card .table-responsive::-webkit-scrollbar {
@@ -310,7 +457,7 @@
         }
 
         .table-card .table {
-            color: #111111;
+            color: var(--tailor-text);
             margin-bottom: 0;
             min-width: 1120px;
             border-collapse: separate;
@@ -318,15 +465,15 @@
         }
 
         .table-card .table thead th {
-            color: #ffffff;
-            font-size: 0.84rem;
+            color: #a79e8f;
+            font-size: 0.72rem;
             text-transform: uppercase;
-            letter-spacing: 0.08em;
+            letter-spacing: 0.14em;
             font-weight: 700;
-            background: #111111;
-            border-bottom: 1px solid rgba(0, 0, 0, 0.14);
+            background: rgba(255, 255, 255, 0.015);
+            border-bottom: 1px solid rgba(201, 168, 76, 0.14);
             white-space: nowrap;
-            padding: 0.95rem 1rem;
+            padding: 0.9rem 0.85rem;
             vertical-align: middle;
         }
 
@@ -338,62 +485,87 @@
             border-top-right-radius: 0.85rem;
         }
 
+        .table-card .table.report-table thead th,
+        .table-card .table.invoice-table thead th {
+            color: #d4c7b2;
+            background:
+                linear-gradient(180deg, rgba(201, 168, 76, 0.08), rgba(255, 255, 255, 0.015));
+            border-bottom: 1px solid rgba(201, 168, 76, 0.2);
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+        }
+
+        .table-card .table.report-table thead th:first-child,
+        .table-card .table.invoice-table thead th:first-child {
+            box-shadow: inset 3px 0 0 rgba(201, 168, 76, 0.9), inset 0 -1px 0 rgba(255, 255, 255, 0.02);
+        }
+
         .table-card .table tbody td {
-            color: #222222;
-            padding: 1.05rem 1rem;
-            border-bottom: 1px solid rgba(201, 166, 101, 0.22);
+            color: var(--tailor-text);
+            padding: 0.82rem 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
             vertical-align: middle;
-            background: rgba(255, 252, 245, 0.94);
+            background: #1e1d1a;
+            font-size: 0.86rem;
+            line-height: 1.35;
+        }
+
+        .table-card .table tbody tr:nth-child(even) td {
+            background: #1a1916;
         }
 
         .table-card .table tbody tr:hover td {
-            background: #fffaf1;
+            background: rgba(201, 168, 76, 0.04);
+        }
+
+        .table-card .table tbody tr:hover td:first-child {
+            box-shadow: inset 3px 0 0 #c9a84c;
         }
 
         .status-pill {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            min-width: 108px;
-            padding: 0.45rem 0.95rem;
+            min-width: 96px;
+            padding: 0.36rem 0.8rem;
             border-radius: 999px;
-            font-size: 0.84rem;
+            font-size: 0.74rem;
             font-weight: 500;
             border: 1px solid transparent;
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
         }
 
         .status-pill.pending {
-            color: #4c3a1f;
-            background: #f8e3be;
-            border-color: #efcf96;
+            color: #8d5a12;
+            background: rgba(215, 154, 30, 0.12);
+            border-color: rgba(215, 154, 30, 0.28);
             box-shadow: none;
         }
 
         .status-pill.in-progress {
-            color: #35506d;
-            background: #dcebfa;
-            border-color: #c6dcf4;
+            color: #7a5c18;
+            background: rgba(178, 142, 52, 0.13);
+            border-color: rgba(178, 142, 52, 0.26);
             box-shadow: none;
         }
 
         .status-pill.completed {
-            color: #245640;
-            background: #dcefe6;
-            border-color: #c2e1d2;
+            color: #1f7a4f;
+            background: rgba(33, 145, 89, 0.12);
+            border-color: rgba(33, 145, 89, 0.28);
             box-shadow: none;
         }
 
         .amount-cell {
-            color: #111111;
+            color: var(--tailor-gold);
             font-weight: 800;
-            font-size: 0.98rem;
+            font-size: 0.88rem;
             white-space: nowrap;
         }
 
         .date-cell {
             white-space: nowrap;
             min-width: 178px;
+            font-size: 0.8rem;
         }
 
         .note-col {
@@ -405,10 +577,11 @@
             max-width: 320px;
             white-space: normal;
             line-height: 1.35;
+            font-size: 0.8rem;
         }
 
         .subdued {
-            color: #6b5b3c !important;
+            color: var(--tailor-muted) !important;
         }
 
         .details-cell {
@@ -418,10 +591,10 @@
         .details-btn {
             min-height: auto;
             padding: 0;
-            font-size: 0.95rem;
-            font-weight: 700;
+            font-size: 0.8rem;
+            font-weight: 600;
             white-space: nowrap;
-            color: #b48a4d !important;
+            color: var(--tailor-gold) !important;
             background: transparent !important;
             border: 0 !important;
             border-radius: 0 !important;
@@ -450,7 +623,7 @@
         .action-btn {
             width: 44px;
             height: 44px;
-            border-radius: 10px;
+            border-radius: 0.95rem;
             padding: 0;
             display: inline-flex;
             align-items: center;
@@ -460,9 +633,9 @@
         }
 
         .action-btn.edit-btn {
-            background: rgba(17, 17, 17, 0.95);
-            color: #ffffff;
-            border: 1px solid rgba(200, 155, 44, 0.24);
+            background: #232323;
+            color: var(--tailor-white);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .action-btn.edit-btn:hover {
@@ -471,39 +644,30 @@
         }
 
         .action-btn.hide-btn {
-            background: rgba(17, 17, 17, 0.08);
-            color: #111111;
-            border: 1px solid rgba(17, 17, 17, 0.18);
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--tailor-white);
+            border: 1px solid rgba(255, 255, 255, 0.08);
         }
 
         .action-btn.hide-btn:hover {
-            background: #111111;
+            background: #2a2a2a;
             color: #ffffff;
+        }
+
+        .action-btn.print-btn {
+            background: rgba(201, 168, 76, 0.06);
+            color: var(--tailor-gold);
+            border: 1px solid rgba(201, 168, 76, 0.22);
+        }
+
+        .action-btn.print-btn:hover {
+            background: var(--tailor-gold);
+            color: #111111;
         }
 
         .action-btn svg {
             width: 16px;
             height: 16px;
-        }
-
-        .print-icon-btn {
-            width: 44px;
-            height: 44px;
-            padding: 0;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px !important;
-            color: #111111;
-            border-color: rgba(197, 150, 47, 0.32) !important;
-            background: linear-gradient(180deg, #ffffff, #fcf7ed);
-            box-shadow: 0 0 18px rgba(200, 155, 44, 0.12);
-        }
-
-        .print-icon-btn:hover {
-            color: #111111 !important;
-            background: linear-gradient(135deg, #f0ca65, #ca9828);
-            border-color: rgba(197, 150, 47, 0.5) !important;
         }
 
         .table-card .table tbody td.actions-cell {
@@ -515,19 +679,118 @@
         .table-card .table tbody td:nth-child(2),
         .table-card .table tbody td:nth-child(3),
         .table-card .table tbody td:nth-child(4) {
-            color: #292522;
+            color: var(--tailor-white);
         }
 
         .invoice-search {
-            margin-bottom: 0.55rem !important;
+            margin-bottom: 1rem !important;
+            justify-content: flex-end;
+        }
+
+        .invoice-search .search-shell {
+            position: relative;
+            max-width: 420px;
+            margin-left: auto;
+        }
+
+        .invoice-search .search-shell svg {
+            position: absolute;
+            top: 50%;
+            left: 0.9rem;
+            width: 1rem;
+            height: 1rem;
+            transform: translateY(-50%);
+            color: var(--tailor-muted);
+            pointer-events: none;
         }
 
         .invoice-search .form-control,
         .invoice-search .form-select {
-            min-height: 48px;
+            min-height: 2.5rem;
             padding-top: 0.6rem;
             padding-bottom: 0.6rem;
-            border-radius: 4px !important;
+            background: #171614;
+            border: 1px solid rgba(201, 168, 76, 0.1);
+            color: var(--tailor-white);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.015);
+        }
+
+        .invoice-search .form-control {
+            padding-left: 2.7rem;
+        }
+
+        .invoice-search .form-control::placeholder {
+            color: var(--tailor-muted);
+        }
+
+        .invoice-search .form-control:focus,
+        .invoice-search .form-select:focus {
+            background: #171614;
+            color: var(--tailor-white);
+            border-color: rgba(201, 168, 76, 0.24);
+            box-shadow: 0 0 0 0.18rem rgba(201, 168, 76, 0.08);
+        }
+
+        .table-summary-row td {
+            background:
+                linear-gradient(180deg, #f7f7f7 0%, #efefef 100%) !important;
+            border-top: 1px solid rgba(201, 168, 76, 0.22);
+            border-bottom: 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            font-weight: 700;
+            padding: 1rem 1.15rem !important;
+            vertical-align: middle;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.85);
+        }
+
+        .table-summary-row td:first-child {
+            border-radius: 1rem 0 0 1rem;
+            padding-left: 1.35rem !important;
+            box-shadow: inset 3px 0 0 #111111 !important;
+        }
+
+        .table-summary-row td:last-child {
+            border-radius: 0 1rem 1rem 0;
+            padding-right: 1.35rem !important;
+        }
+
+        .table-summary-row .summary-label {
+            color: rgba(17, 17, 17, 0.56);
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            font-size: 0.62rem;
+            display: inline-block;
+            margin-bottom: 0.22rem;
+            font-weight: 700;
+        }
+
+        .table-summary-meta {
+            display: block;
+            color: rgba(17, 17, 17, 0.62);
+            font-size: 0.76rem;
+            font-weight: 500;
+            line-height: 1.45;
+        }
+
+        .table-summary-value {
+            color: #111111;
+            font-size: 1.08rem;
+            font-weight: 700;
+            line-height: 1.15;
+        }
+
+        .table-summary-row .amount-cell,
+        .table-summary-row td[colspan="2"] {
+            min-width: 140px;
+        }
+
+        .table-card .table tbody tr.table-summary-row:hover td {
+            background: linear-gradient(180deg, #f9f9f9 0%, #f1f1f1 100%) !important;
+        }
+
+        .table-card .table tbody tr.table-summary-row:hover td:first-child {
+            box-shadow: inset 3px 0 0 #111111 !important;
         }
 
         .details-modal {
@@ -551,8 +814,8 @@
         .details-modal-backdrop {
             position: absolute;
             inset: 0;
-            background: rgba(17, 17, 17, 0.58);
-            backdrop-filter: blur(3px);
+            background: rgba(15, 15, 15, 0.32);
+            backdrop-filter: blur(2px);
         }
 
         .details-modal-dialog {
@@ -562,175 +825,228 @@
             width: min(1140px, 100%);
             max-height: calc(100vh - 3.25rem);
             overflow: hidden;
-            border-radius: 1.1rem;
+            border-radius: 1rem;
             background: #ffffff;
-            border: 1px solid rgba(17, 17, 17, 0.12);
-            box-shadow: 0 26px 80px rgba(17, 17, 17, 0.22);
+            border: 1px solid rgba(17, 17, 17, 0.08);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.16);
         }
 
         .details-modal-header {
             position: relative;
-            padding: 1.9rem 2rem 1rem;
+            padding: 1.15rem 1.25rem 0.95rem;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.08);
         }
 
         .details-modal-title {
-            margin: 0.2rem 0 0;
+            margin: 0;
             color: #111111;
-            font-size: clamp(1.45rem, 2vw, 2rem);
+            font-size: clamp(1.25rem, 1.9vw, 1.7rem);
             text-align: center;
         }
 
         .details-modal-close {
             position: absolute;
-            top: 1.9rem;
-            right: 2rem;
-            width: 46px;
-            height: 38px;
-            border: 0;
-            border-radius: 0.45rem;
-            background: #ff5a5f;
-            color: #ffffff;
-            font-size: 1.4rem;
+            top: 1.2rem;
+            right: 1.25rem;
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 1px solid rgba(17, 17, 17, 0.12);
+            border-radius: 999px;
+            background: #ffffff;
+            color: #111111;
+            font-size: 1.15rem;
             line-height: 1;
             flex-shrink: 0;
         }
 
         .details-modal-close:hover {
-            background: #eb4348;
-            color: #ffffff;
+            background: #f6f6f6;
+            color: #111111;
         }
 
         .details-modal-body {
             flex: 1 1 auto;
             min-height: 0;
-            padding: 0 2rem 3rem;
+            padding: 1rem 1.25rem 1.75rem;
             overflow-y: auto;
         }
 
         .details-hero {
             display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            align-items: start;
-            margin-bottom: 1.4rem;
+            grid-template-columns: minmax(180px, 1fr) minmax(0, 1fr) minmax(180px, 1fr);
+            gap: 0.9rem;
+            align-items: center;
+            margin-bottom: 0;
             width: 100%;
         }
 
         .details-hero-side {
             min-width: 0;
+            padding: 0;
+            border-radius: 0;
+            background: transparent;
+            border: 0;
         }
 
         .details-hero-label {
             display: block;
-            color: #111111;
-            font-size: 0.9rem;
+            color: #8c857b;
+            font-size: 0.68rem;
             font-weight: 700;
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.12rem;
+            text-transform: uppercase;
+            letter-spacing: 0.16em;
         }
 
         .details-hero-value {
-            color: #222222;
-            font-size: 0.92rem;
+            color: #111111;
+            font-size: 0.86rem;
         }
 
         .details-hero-center {
             text-align: center;
             min-width: 0;
             align-self: center;
+            grid-column: 2;
+            padding-inline: 0;
+        }
+
+        .details-hero-spacer {
+            min-width: 0;
         }
 
         .details-grid {
             display: grid;
-            gap: 1.35rem;
+            gap: 1rem;
         }
 
         .details-section {
-            border: 1px solid rgba(17, 17, 17, 0.18);
-            border-radius: 0;
+            border: 1px solid rgba(17, 17, 17, 0.08);
+            border-radius: 0.95rem;
             overflow: hidden;
             background: #ffffff;
         }
 
         .details-section-title {
-            padding: 0.7rem 0.9rem;
-            border-bottom: 1px solid rgba(17, 17, 17, 0.18);
-            font-size: 0.86rem;
+            padding: 0.85rem 1rem;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+            font-size: 0.78rem;
             font-weight: 700;
             color: #111111;
             background: #ffffff;
             text-transform: uppercase;
-            letter-spacing: 0.04em;
+            letter-spacing: 0.18em;
         }
 
         .details-section-body {
-            padding: 0.9rem 0 1.1rem;
+            padding: 0.9rem;
         }
 
         .details-info-grid {
             display: grid;
             grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 1.25rem 2rem;
-            padding: 0 0.9rem;
+            gap: 0.8rem;
         }
 
         .details-info-grid.two-col {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
 
+        .details-info-grid > div {
+            padding: 0.8rem 0.9rem;
+            border-radius: 0;
+            background: transparent;
+            border: 0;
+        }
+
         .details-item-label {
             display: block;
-            color: #3b3020;
-            font-size: 0.8rem;
+            color: #8f897f;
+            font-size: 0.72rem;
             font-weight: 700;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.2rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
         }
 
         .details-item-value {
-            color: #222222;
-            font-size: 0.96rem;
-            line-height: 1.5;
+            color: var(--tailor-text);
+            font-size: 0.92rem;
+            line-height: 1.45;
+            font-weight: 600;
             word-break: break-word;
         }
 
         .details-note {
-            padding: 0 0.9rem;
-            color: #222222;
-            font-size: 0.98rem;
-            line-height: 1.65;
+            padding: 0.2rem 0;
+            color: var(--tailor-text);
+            font-size: 0.92rem;
+            line-height: 1.7;
             white-space: pre-wrap;
             word-break: break-word;
+            border-radius: 0;
+            background: transparent;
+            border: 0;
         }
 
         .details-status-form {
-            padding: 0 0.9rem 1.1rem;
+            padding: 0;
         }
 
         .details-status-actions {
             display: flex;
             justify-content: flex-end;
-            gap: 0.75rem;
-            margin-top: 1.5rem;
-            padding-bottom: 0.35rem;
+            gap: 0.55rem;
+            margin-top: 0.75rem;
             flex-wrap: wrap;
         }
 
         .details-status-form .form-select {
-            min-height: 52px;
+            min-height: 40px;
             border-radius: 0 !important;
+            font-size: 0.84rem;
         }
 
         .details-update-btn {
-            min-width: 170px;
-            min-height: 46px;
+            min-width: 120px;
+            min-height: 38px;
+            padding: 0.45rem 0.9rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #ffffff !important;
         }
 
         .details-close-btn {
-            min-width: 110px;
-            min-height: 46px;
+            min-width: 88px;
+            min-height: 38px;
+            padding: 0.45rem 0.85rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #111111 !important;
+            background: #ffffff !important;
+            border: 1px solid rgba(17, 17, 17, 0.14) !important;
+        }
+
+        .details-close-btn:hover,
+        .details-close-btn:focus {
+            color: #111111 !important;
+            background: #f5f5f5 !important;
+            border-color: rgba(17, 17, 17, 0.18) !important;
+            box-shadow: none !important;
         }
 
         body.modal-open {
             overflow: hidden;
+        }
+
+        @media (max-width: 1199.98px) {
+            .report-workspace {
+                grid-template-columns: 1fr;
+            }
+
+            .report-sidebar {
+                position: static;
+            }
         }
 
         @media (max-width: 991.98px) {
@@ -746,6 +1062,11 @@
                 text-align: center;
             }
 
+            .report-toolbar-head {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
             .details-info-grid,
             .details-info-grid.two-col {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -753,6 +1074,22 @@
         }
 
         @media (max-width: 767.98px) {
+            .invoice-search .search-shell {
+                max-width: none;
+            }
+
+            .details-hero {
+                grid-template-columns: 1fr;
+            }
+
+            .details-hero-spacer {
+                display: none;
+            }
+
+            .details-hero-center {
+                padding-inline: 0;
+            }
+
             .details-modal-header,
             .details-modal-body {
                 padding-left: 1rem;
@@ -783,41 +1120,279 @@
             .details-status-actions .btn {
                 width: 100%;
             }
+
+            .table-toolbar {
+                justify-content: stretch;
+            }
+
+            .table-toolbar .btn {
+                width: 100%;
+            }
+        }
+
+        .hero-panel,
+        .table-card,
+        .stat-card,
+        .report-toolbar,
+        .category-summary-panel,
+        .category-summary-card {
+            background: #ffffff;
+            border-color: rgba(17, 17, 17, 0.08);
+            box-shadow: 0 10px 24px rgba(17, 17, 17, 0.08);
+        }
+
+        .category-summary-toggle-icon,
+        .action-btn.edit-btn,
+        .action-btn.hide-btn {
+            background: #f5f5f5;
+            color: #111111;
+            border-color: rgba(17, 17, 17, 0.1);
+        }
+
+        .report-toolbar {
+            background: linear-gradient(180deg, #ffffff 0%, #fcfaf6 100%);
+            border-color: rgba(17, 17, 17, 0.07);
+            box-shadow: 0 12px 28px rgba(17, 17, 17, 0.06);
+        }
+
+        .report-toolbar-head {
+            padding-bottom: 0.8rem;
+            border-bottom: 1px solid rgba(17, 17, 17, 0.06);
+        }
+
+        .report-toolbar-title {
+            color: #111111;
+        }
+
+        .report-toolbar-copy {
+            color: rgba(17, 17, 17, 0.58);
+        }
+
+        .report-filter-col .form-label {
+            color: rgba(17, 17, 17, 0.58);
+            font-size: 0.64rem;
+            letter-spacing: 0.14em;
+        }
+
+        .report-toolbar .form-control,
+        .report-toolbar .form-select {
+            min-height: 2.85rem;
+            background: #fbfaf7;
+            border-color: rgba(17, 17, 17, 0.1);
+            border-radius: 0.95rem !important;
+            color: #111111;
+        }
+
+        .report-toolbar .form-control::placeholder {
+            color: rgba(17, 17, 17, 0.42);
+        }
+
+        .report-toolbar .form-control:focus,
+        .report-toolbar .form-select:focus {
+            background: #ffffff;
+            border-color: rgba(215, 154, 30, 0.24);
+            box-shadow: 0 0 0 0.18rem rgba(215, 154, 30, 0.08);
+        }
+
+        .report-filter-actions {
+            gap: 0.55rem;
+        }
+
+        .report-filter-actions .btn {
+            min-height: 2.85rem;
+            border-radius: 0.95rem !important;
+            font-size: 0.78rem;
+            font-weight: 700;
+        }
+
+        .report-filter-actions .btn-tailor {
+            background: #111111;
+            border-color: #111111;
+        }
+
+        .report-filter-actions .btn-tailor:hover,
+        .report-filter-actions .btn-tailor:focus {
+            background: #111111;
+            border-color: #111111;
+        }
+
+        .report-filter-actions .btn-outline-secondary {
+            background: #ffffff;
+            color: #111111;
+            border-color: rgba(17, 17, 17, 0.12);
+        }
+
+        .category-summary-title,
+        .category-summary-label,
+        .category-summary-amount,
+        .stat-value,
+        .table-summary-row .summary-label,
+        .table-summary-value,
+        .details-modal-title,
+        .details-item-value,
+        .details-section-title,
+        .details-hero-value,
+        .details-note,
+        .details-hero-side,
+        .table-card .table tbody td:first-child,
+        .table-card .table tbody td:nth-child(2),
+        .table-card .table tbody td:nth-child(3),
+        .table-card .table tbody td:nth-child(4) {
+            color: #111111;
+        }
+
+        .stat-value.revenue,
+        .amount-cell,
+        .details-btn,
+        .action-btn.print-btn,
+        .details-modal-close:hover {
+            color: #111111 !important;
+        }
+
+        .table-card .table thead th,
+        .table-card .table.report-table thead th,
+        .table-card .table.invoice-table thead th {
+            color: #ffffff;
+            background: #111111;
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+            box-shadow: none;
+        }
+
+        .table-card .table.report-table thead th:first-child,
+        .table-card .table.invoice-table thead th:first-child,
+        .table-card .table tbody tr:hover td:first-child {
+            box-shadow: inset 3px 0 0 #111111;
+        }
+
+        .table-card .table tbody td,
+        .table-card .table tbody tr:nth-child(even) td {
+            color: var(--tailor-text);
+            background: #ffffff;
+            border-bottom-color: rgba(17, 17, 17, 0.08);
+        }
+
+        .table-card .table tbody tr:nth-child(even) td {
+            background: #fafafa;
+        }
+
+        .table-card .table tbody tr:hover td {
+            background: #f3f3f3;
+        }
+
+        .status-pill {
+            box-shadow: none;
+        }
+
+        .status-pill.pending,
+        .status-pill.in-progress {
+            background: #f8f3e8;
+        }
+
+        .status-pill.pending {
+            color: #8d5a12;
+            border-color: rgba(215, 154, 30, 0.2);
+        }
+
+        .status-pill.in-progress {
+            color: #7a5c18;
+            border-color: rgba(178, 142, 52, 0.22);
+        }
+
+        .status-pill.completed {
+            color: #1f7a4f;
+            background: #ebf7f0;
+            border-color: rgba(33, 145, 89, 0.22);
+        }
+
+        .invoice-search .form-control,
+        .invoice-search .form-select,
+        .details-modal-close,
+        .details-item,
+        .details-note,
+        .details-section-body {
+            background: #ffffff;
+            color: #111111;
+            border-color: rgba(17, 17, 17, 0.1);
+            box-shadow: none;
+        }
+
+        .invoice-search .form-control:focus,
+        .invoice-search .form-select:focus {
+            background: #f3f3f3;
+        }
+
+        .table-summary-row td {
+            background:
+                linear-gradient(180deg, #f9f9f9 0%, #f1f1f1 100%) !important;
+            border-top-color: rgba(17, 17, 17, 0.08);
+        }
+
+        .details-modal-dialog {
+            background: #ffffff;
+            border-color: rgba(17, 17, 17, 0.12);
+            box-shadow: 0 30px 90px rgba(17, 17, 17, 0.16);
+        }
+
+        .details-modal-header,
+        .details-section,
+        .details-item {
+            border-bottom-color: rgba(17, 17, 17, 0.08);
+            border-color: rgba(17, 17, 17, 0.08);
+        }
+
+        .details-modal-close {
+            color: #111111;
+        }
+
+        .details-status-actions .btn-outline-secondary {
+            color: #111111;
+            border-color: rgba(17, 17, 17, 0.2);
         }
     </style>
 
     <div class="orders-view">
         <div class="orders-content">
-            <div class="hero-panel mb-4">
-                <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-start gap-4">
-                    <div>
-                        <h2 class="hero-title">{{ $pageMode === 'report' ? 'Reports' : 'Tailor Invoice Overview' }}</h2>
-                        <p class="hero-copy mb-0">
-                            @if ($pageMode === 'report')
-                                Monthly and tailor performance reports with filterable summaries and clean exports.
-                            @else
-                                Track all invoices, payments, and current status in one place.
-                            @endif
-                        </p>
-                    </div>
-
-                    <div class="hero-action d-flex gap-2 flex-wrap">
-                        @if ($pageMode === 'report')
-                            <a href="{{ route('admin.orders.index', array_merge($filters, ['export' => 'pdf'])) }}" class="btn btn-tailor px-4">Download PDF</a>
-                        @else
-                            <a href="{{ route('admin.orders.create') }}" class="btn btn-tailor px-4">Create New Invoice</a>
-                        @endif
-                    </div>
+            @if ($pageMode === 'report')
+                @if ($canFilterTailors)
+                    <span class="legacy-copy">Tailor Wise</span>
+                @endif
+            @else
+                <div class="orders-top-action">
+                    <span class="legacy-copy">Create New Invoice</span>
+                    <a href="{{ route('admin.orders.create') }}" class="btn btn-tailor create-tailor-btn px-4">Create New Tailor</a>
                 </div>
-            </div>
+            @endif
 
             @if ($pageMode === 'report')
-                <div class="report-toolbar mb-4">
-                    <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3 align-items-end">
+                <div class="report-workspace">
+                    <div class="report-sidebar">
+                        <div class="report-toolbar">
+                            <div class="report-toolbar-head">
+                                <div>
+                                    <h3 class="report-toolbar-title">Refine Report</h3>
+                                    <p class="report-toolbar-copy">Filter by category, invoice, fatora, and date.</p>
+                                </div>
+                                <div class="report-toolbar-actions">
+                                    <a
+                                        href="{{ route('admin.orders.index', array_merge($filters, ['export' => 'pdf'])) }}"
+                                        class="btn btn-tailor report-download-icon"
+                                        aria-label="Download PDF"
+                                        title="Download PDF"
+                                    >
+                                        <span class="legacy-copy">Download PDF</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                            <path d="M12 3v11"/>
+                                            <path d="M7 10l5 5 5-5"/>
+                                            <path d="M5 19h14"/>
+                                        </svg>
+                                    </a>
+                                </div>
+                            </div>
+                            <form method="GET" action="{{ route('admin.orders.index') }}" class="row align-items-end report-filter-form">
                         <input type="hidden" name="view" value="report">
                         @if ($canFilterTailors)
-                            <div class="col-12 col-md-6 col-xl">
-                                <label for="assigned_user_id" class="form-label">Tailor Wise</label>
+                            <div class="col-12 col-md-6 col-xl report-filter-col">
+                                <label for="assigned_user_id" class="form-label">Tailor</label>
                                 <select id="assigned_user_id" name="assigned_user_id" class="form-select rounded-4">
                                     <option value="">All Tailors</option>
                                     @foreach ($assignableUsers as $assignableUser)
@@ -831,8 +1406,8 @@
                             <input type="hidden" name="assigned_user_id" value="{{ $filters['assigned_user_id'] }}">
                         @endif
 
-                        <div class="col-12 col-md-6 col-xl">
-                            <label for="thobe_category" class="form-label">Category Wise</label>
+                        <div class="col-12 col-md-6 col-xl report-filter-col">
+                            <label for="thobe_category" class="form-label">Category</label>
                             <select id="thobe_category" name="thobe_category" class="form-select rounded-4">
                                 <option value="">All Categories</option>
                                 @foreach ($categories as $categoryValue => $category)
@@ -843,83 +1418,91 @@
                             </select>
                         </div>
 
-                        <div class="col-12 col-md-6 col-xl">
-                            <label for="invoice_number" class="form-label">Invoice Number Wise</label>
+                        <div class="col-12 col-md-6 col-xl report-filter-col">
+                            <label for="invoice_number" class="form-label">Invoice #</label>
                             <input type="text" id="invoice_number" name="invoice_number" value="{{ $filters['invoice_number'] }}" class="form-control rounded-4" placeholder="Invoice number">
                         </div>
 
-                        <div class="col-12 col-md-6 col-xl">
+                        <div class="col-12 col-md-6 col-xl report-filter-col">
                             <label for="fatora_number" class="form-label">Fatora Number</label>
                             <input type="text" id="fatora_number" name="fatora_number" value="{{ $filters['fatora_number'] }}" class="form-control rounded-4" placeholder="Fatora number">
                         </div>
 
-                        <div class="col-12 col-md-6 col-xl">
-                            <label for="date_from" class="form-label">Date From</label>
+                        <div class="col-12 col-md-6 col-xl report-filter-col">
+                            <label for="date_from" class="form-label">From Date</label>
                             <input type="date" id="date_from" name="date_from" value="{{ $filters['date_from'] }}" class="form-control rounded-4">
                         </div>
 
-                        <div class="col-12 col-md-6 col-xl">
-                            <label for="date_to" class="form-label">Date To</label>
+                        <div class="col-12 col-md-6 col-xl report-filter-col">
+                            <label for="date_to" class="form-label">To Date</label>
                             <input type="date" id="date_to" name="date_to" value="{{ $filters['date_to'] }}" class="form-control rounded-4">
                         </div>
 
-                        <div class="col-12 col-md-6 col-xl-auto d-grid gap-2 report-filter-actions">
+                        <div class="col-12 col-md-6 col-xl-auto report-filter-actions">
                             <button type="submit" class="btn btn-tailor rounded-4">Filter</button>
                             <a href="{{ route('admin.orders.index', ['view' => 'report']) }}" class="btn btn-outline-secondary rounded-4">Reset</a>
                         </div>
-                    </form>
-                </div>
+                            </form>
+                        </div>
 
-                @if ($hasActiveReportFilters)
-                    <div class="report-summary-section mb-4">
-                        <div class="category-summary-panel">
-                            <div class="category-summary-body" id="category-summary-body">
-                                <div class="mb-3">
-                                    <h3 class="category-summary-title mb-1">
-                                        {{ $filters['thobe_category'] === '' ? 'All Categories Summary' : 'Selected Category Summary' }}
-                                    </h3>
-                                    <p class="category-summary-copy mb-0">
-                                        Quantity and amount are calculated based on the current report filters.
-                                    </p>
-                                </div>
-                                <div class="category-summary-grid">
-                                    @foreach ($reportCategorySummaries as $summary)
-                                        <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
-                                            <div class="category-summary-label">{{ $summary['label'] }}</div>
-                                            <div class="category-summary-price">Single Price: {{ number_format($summary['unit_price'], 2) }} QAR</div>
-                                            <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
-                                            <div class="category-summary-footer">
-                                                <div class="category-summary-meta">Total Thobes</div>
-                                                <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
-                                            </div>
+                        @if ($hasActiveReportFilters)
+                            <div class="report-summary-section">
+                                <div class="category-summary-panel">
+                                    <div class="category-summary-body" id="category-summary-body">
+                                        <div class="mb-3">
+                                            <h3 class="category-summary-title mb-1">
+                                                {{ $filters['thobe_category'] === '' ? 'All Categories Summary' : 'Selected Category Summary' }}
+                                            </h3>
+                                            <p class="category-summary-copy mb-0">
+                                                Quantity and amount are calculated based on the current report filters.
+                                            </p>
                                         </div>
-                                    @endforeach
+                                        <div class="category-summary-grid">
+                                            @foreach ($reportCategorySummaries as $summary)
+                                                <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
+                                                    <div class="category-summary-label">{{ $summary['label'] }}</div>
+                                                    <div class="category-summary-price">Single Price: {{ number_format($summary['unit_price'], 2) }} QAR</div>
+                                                    <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
+                                                    <div class="category-summary-footer">
+                                                        <div class="category-summary-meta">Total Thobes</div>
+                                                        <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        @endif
                     </div>
-                @endif
+                
 
             @endif
 
-            <div class="table-card">
+                <div class="table-card {{ $pageMode === 'report' ? 'report-results-card' : '' }}">
                 @if ($pageMode !== 'report')
                     <form method="GET" action="{{ route('admin.orders.index') }}" class="row g-3 align-items-end invoice-search" id="invoice-search-form">
                         <input type="hidden" name="view" value="invoices">
                         <div class="col-12 col-xl-5 ms-xl-auto">
-                            <input
-                                type="text"
-                                id="search"
-                                name="search"
-                                value="{{ $filters['search'] }}"
-                                class="form-control rounded-4"
-                                placeholder="Search Here...">
+                            <div class="search-shell">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                    <circle cx="11" cy="11" r="7"></circle>
+                                    <path d="m20 20-3.5-3.5"></path>
+                                </svg>
+                                <input
+                                    type="text"
+                                    id="search"
+                                    name="search"
+                                    value="{{ $filters['search'] }}"
+                                    class="form-control rounded-4"
+                                    placeholder="Search invoice, fatora, or tailor">
+                            </div>
                         </div>
                     </form>
                 @endif
 
                 <div class="table-responsive">
-                    <table class="table align-middle">
+                    <table class="table align-middle {{ $pageMode === 'report' ? 'report-table' : 'invoice-table' }}">
                         <thead>
                             <tr>
                                 <th>Invoice #</th>
@@ -962,7 +1545,7 @@
                                     <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
                                     <td>{{ $order->category_label }}</td>
                                     <td>{{ $order->quantity }}</td>
-                                    <td class="note-cell">{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 70) }}</td>
+                                    <td class="note-cell" title="{{ $order->note ?: 'No note added' }}">{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 40) }}</td>
                                     <td>
                                         <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
                                             {{ $order->status_label }}
@@ -977,7 +1560,7 @@
                                             type="button"
                                             class="btn btn-outline-dark details-btn view-details-btn"
                                             data-order="{{ json_encode($detailPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }}">
-                                            View
+                                            View Details
                                         </button>
                                     </td>
                                     @if ($canManageSettings && $pageMode !== 'report')
@@ -1002,8 +1585,8 @@
                                                         </svg>
                                                     </button>
                                                 </form>
-                                                <a href="{{ route('admin.orders.receipt', $order) }}" class="btn btn-sm btn-outline-secondary rounded-circle print-icon-btn" target="_blank" rel="noopener" aria-label="Print Receipt" title="Print Receipt">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                <a href="{{ route('admin.orders.receipt', $order) }}" class="btn action-btn print-btn" target="_blank" rel="noopener" aria-label="Print Receipt" title="Print Receipt">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
                                                         <path d="M6 9V4h12v5"/>
                                                         <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
                                                         <path d="M6 14h12v6H6z"/>
@@ -1018,6 +1601,23 @@
                                     <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 10 : 9 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
                                 </tr>
                             @endforelse
+                            @if ($pageMode === 'report' && $orders->count())
+                                <tr class="table-summary-row">
+                                    <td colspan="5">
+                                        <span class="summary-label">Report Summary</span>
+                                        <span class="table-summary-meta">Filtered totals for the current report view.</span>
+                                    </td>
+                                    <td colspan="2">
+                                        <span class="summary-label">Records</span>
+                                        <span class="table-summary-value">{{ $visibleOrderCount }}</span>
+                                    </td>
+                                    <td class="amount-cell">
+                                        <span class="summary-label">Amount</span>
+                                        <span class="table-summary-value">{{ number_format($visibleOrderAmount, 2) }} QAR</span>
+                                    </td>
+                                    <td>&nbsp;</td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>
@@ -1026,6 +1626,9 @@
                     {{ $orders->links() }}
                 </div>
             </div>
+            @if ($pageMode === 'report')
+                </div>
+            @endif
         </div>
     </div>
 
@@ -1041,6 +1644,7 @@
                     <div class="details-hero-center">
                         <h3 class="details-modal-title" id="order-details-title">Invoice Details</h3>
                     </div>
+                    <div class="details-hero-spacer" aria-hidden="true"></div>
                 </div>
                 <button type="button" class="details-modal-close" aria-label="Close details modal" data-close-details-modal>&times;</button>
             </div>

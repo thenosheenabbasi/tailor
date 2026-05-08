@@ -24,6 +24,9 @@ Route::middleware('auth')->group(function (): void {
 
     Route::middleware('role:admin,manager,user')->prefix('admin')->name('admin.')->group(function (): void {
         Route::get('/orders', [TailorOrderController::class, 'index'])->name('orders.index');
+        Route::get('/profile', [UserController::class, 'profile'])->name('users.profile');
+        Route::get('/profile/edit', [UserController::class, 'editProfile'])->name('users.profile.edit');
+        Route::patch('/profile', [UserController::class, 'updateProfile'])->name('users.profile.update');
     });
 
     Route::middleware('role:admin,manager')->prefix('admin')->name('admin.')->group(function (): void {

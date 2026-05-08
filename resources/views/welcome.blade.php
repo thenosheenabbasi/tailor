@@ -34,14 +34,16 @@
         }
 
         .btn-tailor {
-            background: linear-gradient(135deg, #111111, #2b2b2b);
+            background: #111111;
             color: #ffffff;
-            border: 1px solid rgba(17, 17, 17, 0.92);
+            border: 1px solid #111111;
             border-radius: 10px;
         }
 
         .btn-tailor:hover {
             color: #ffffff;
+            background: #111111;
+            border-color: #111111;
             opacity: 0.95;
         }
     </style>

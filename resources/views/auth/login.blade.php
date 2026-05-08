@@ -11,10 +11,10 @@
             --gold: #c89b2c;
             --gold-deep: #a57d1e;
             --ink: #111111;
-            --panel: rgba(255, 255, 255, 0.98);
-            --panel-soft: rgba(200, 155, 44, 0.08);
-            --text: #1f1a17;
-            --muted: #686155;
+            --panel: rgba(28, 24, 20, 0.72);
+            --panel-soft: rgba(200, 155, 44, 0.12);
+            --text: #f5ead7;
+            --muted: #d6c2a3;
         }
 
         * {
@@ -30,25 +30,26 @@
             overflow: hidden;
             color: var(--text);
             font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
+            background:
+                radial-gradient(circle at top, rgba(200, 155, 44, 0.14), transparent 30%),
+                linear-gradient(135deg, #2a241d 0%, #1b1815 45%, #120f0d 100%);
             position: relative;
         }
 
         body::before {
             content: "";
             position: absolute;
-            inset: -10%;
-            background: none;
+            inset: 0;
+            background:
+                linear-gradient(rgba(22, 16, 10, 0.34), rgba(22, 16, 10, 0.34)),
+                url("{{ asset('images/login-tailor-bg-v2.png') }}") center center / cover no-repeat;
+            opacity: 0.5;
+            filter: saturate(0.88) brightness(0.96);
             pointer-events: none;
         }
 
         body::after {
-            content: "";
-            position: absolute;
-            inset: 34px;
-            border: 1px solid rgba(200, 155, 44, 0.22);
-            border-radius: 34px;
-            pointer-events: none;
+            display: none;
         }
 
         h1, h2, h3 {
@@ -62,33 +63,53 @@
             z-index: 1;
         }
 
+        .login-shell::before {
+            content: "";
+            position: absolute;
+            inset: 40px 90px;
+            background:
+                radial-gradient(circle at center, rgba(255, 255, 255, 0.12), transparent 62%);
+            opacity: 1;
+            pointer-events: none;
+            z-index: 0;
+        }
+
         .login-stage {
             position: relative;
             padding: 0;
+            isolation: isolate;
+            z-index: 1;
         }
 
         .login-stage::before {
-            display: none;
+            content: "";
+            position: absolute;
+            inset: -32px;
+            background:
+                radial-gradient(circle at center, rgba(255, 255, 255, 0.16), transparent 60%);
+            opacity: 1;
+            pointer-events: none;
+            z-index: -1;
         }
 
         .login-card {
             position: relative;
-            max-width: 560px;
+            max-width: 520px;
             margin: 0 auto;
-            padding: 22px 30px 18px;
-            border-radius: 28px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(251, 248, 241, 0.97));
-            border: 1px solid rgba(200, 155, 44, 0.24);
+            padding: 26px 28px 22px;
+            border-radius: 32px;
+            background: linear-gradient(180deg, rgba(33, 28, 24, 0.78), rgba(18, 15, 13, 0.74));
+            border: 1px solid rgba(222, 188, 121, 0.24);
             box-shadow:
-                inset 0 1px 0 rgba(255, 255, 255, 0.88),
-                0 20px 50px rgba(17, 17, 17, 0.07);
-            backdrop-filter: blur(12px);
+                inset 0 1px 0 rgba(255, 244, 220, 0.12),
+                0 28px 70px rgba(0, 0, 0, 0.36);
+            backdrop-filter: blur(16px);
         }
 
         .brand-medallion {
-            width: 126px;
-            height: 126px;
-            margin: -62px auto 10px;
+            width: 112px;
+            height: 112px;
+            margin: -72px auto 14px;
             border-radius: 50%;
             padding: 11px;
             background:
@@ -126,8 +147,8 @@
         .brand-copy h1 {
             font-size: clamp(1.8rem, 3vw, 2.35rem);
             line-height: 1;
-            margin-bottom: 0.2rem;
-            color: #111111;
+            margin-bottom: 0.35rem;
+            color: #fff5e8;
         }
 
         .brand-copy p {
@@ -143,13 +164,13 @@
 
         .field-wrap {
             padding: 12px 14px;
-            border-radius: 18px;
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(251, 248, 241, 0.94));
-            border: 1px solid rgba(200, 155, 44, 0.18);
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 248, 238, 0.06), rgba(255, 248, 238, 0.03));
+            border: 1px solid rgba(224, 191, 126, 0.18);
         }
 
         .form-label {
-            color: #2d241a;
+            color: #f0dec2;
             font-size: 0.78rem;
             font-weight: 700;
             letter-spacing: 0.08em;
@@ -158,21 +179,21 @@
         }
 
         .form-control {
-            background: rgba(255, 255, 255, 0.98);
-            border: 1px solid rgba(200, 155, 44, 0.2);
-            color: var(--text);
+            background: rgba(248, 239, 225, 0.92);
+            border: 1px solid rgba(193, 167, 119, 0.16);
+            color: #1d1813;
             min-height: 50px;
             border-radius: 16px;
             padding: 0.8rem 0.95rem;
         }
 
         .form-control::placeholder {
-            color: #99886a;
+            color: #8b7658;
         }
 
         .form-control:focus {
-            background: #ffffff;
-            color: var(--text);
+            background: rgba(255, 248, 238, 0.98);
+            color: #1d1813;
             border-color: rgba(200, 155, 44, 0.38);
             box-shadow: 0 0 0 0.2rem rgba(200, 155, 44, 0.12);
         }
@@ -195,7 +216,7 @@
             border-radius: 999px;
             border: 1px solid rgba(200, 155, 44, 0.22);
             background: rgba(200, 155, 44, 0.1);
-            color: #6d5c3f;
+            color: #7a6444;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -212,7 +233,7 @@
         }
 
         .form-check-input {
-            background-color: rgba(255, 255, 255, 0.92);
+            background-color: rgba(255, 247, 234, 0.92);
             border-color: rgba(197, 150, 47, 0.22);
         }
 
@@ -223,17 +244,19 @@
 
         .btn-tailor {
             min-height: 52px;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #111111, #2a2a2a);
+            border-radius: 16px;
+            background: linear-gradient(135deg, #d3a73a, #b68423);
             color: #ffffff;
-            border: 1px solid rgba(17, 17, 17, 0.92);
+            border: 1px solid rgba(255, 226, 163, 0.24);
             font-weight: 800;
             letter-spacing: 0.03em;
-            box-shadow: 0 14px 28px rgba(17, 17, 17, 0.12);
+            box-shadow: 0 14px 28px rgba(0, 0, 0, 0.22);
         }
 
         .btn-tailor:hover {
             color: #ffffff;
+            background: linear-gradient(135deg, #dbaf44, #bf8d2a);
+            border-color: rgba(255, 226, 163, 0.28);
             opacity: 0.97;
             transform: translateY(-1px);
         }
@@ -249,24 +272,33 @@
                 padding: 14px;
             }
 
+            .login-shell::before {
+                inset: 28px 18px 110px;
+                background: radial-gradient(circle at center, rgba(255, 255, 255, 0.06), transparent 58%);
+            }
+
             body::after {
-                inset: 16px;
-                border-radius: 24px;
+                display: none;
             }
 
             .login-stage {
                 padding: 0;
             }
 
+            .login-stage::before {
+                inset: -20px;
+                background: radial-gradient(circle at center, rgba(255, 255, 255, 0.08), transparent 56%);
+            }
+
             .login-card {
                 padding: 20px 20px 18px;
-                border-radius: 22px;
+                border-radius: 26px;
             }
 
             .brand-medallion {
-                width: 112px;
-                height: 112px;
-                margin-top: -56px;
+                width: 100px;
+                height: 100px;
+                margin-top: -50px;
             }
         }
     </style>
