@@ -733,7 +733,7 @@
             && !request()->routeIs('admin.users.profile.edit');
     @endphp
 
-    <div class="dashboard-shell sidebar-collapsed">
+    <div class="dashboard-shell">
         <div class="app-body">
             <aside class="sidebar-panel">
                 <div class="sidebar-brand">
@@ -810,7 +810,7 @@
             <main class="workspace-main">
                 <header class="topbar">
                     <div class="topbar-brand">
-                        <button type="button" class="topbar-menu-toggle" data-sidebar-toggle aria-label="Toggle sidebar" aria-expanded="false">
+                        <button type="button" class="topbar-menu-toggle" data-sidebar-toggle aria-label="Toggle sidebar" aria-expanded="true">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true">
                                 <path d="M4 7h16"></path>
                                 <path d="M4 12h16"></path>

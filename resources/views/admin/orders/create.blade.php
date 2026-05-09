@@ -7,7 +7,7 @@
         $currentQuantity = (int) old('quantity', $order?->quantity ?? 1);
         $initialFatora = old('fatora_number', $order?->fatora_number ?? 'F-1007');
         $initialDate = old('order_date', optional($order?->order_date)->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i'));
-        $categoryCards = collect(\App\Models\TailorOrder::categories())->map(function (array $category, string $key) use ($currentCategory) {
+        $categoryDropdownOptions = collect(\App\Models\TailorOrder::categories())->map(function (array $category, string $key) use ($currentCategory) {
             return [
                 'key' => $key,
                 'label' => $category['label'],
@@ -154,94 +154,39 @@
             min-height: 2.7rem;
             padding: 0.62rem 0.82rem;
             border-radius: 0.68rem !important;
-            background: #ffffff;
-            border: 1px solid rgba(17, 17, 17, 0.12);
+            background-color: #ffffff;
+            border: 1.5px solid rgba(17, 17, 17, 0.2);
             color: #111111;
             font-size: 0.88rem;
             box-shadow: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
 
         .entry-field .form-control:hover,
         .entry-field .form-select:hover {
-            border-color: rgba(230, 199, 107, 0.18);
+            border-color: rgba(17, 17, 17, 0.34);
+            background-color: #fffdfa;
         }
 
         .entry-field .form-control:focus,
         .entry-field .form-select:focus {
-            border-color: rgba(230, 199, 107, 0.48);
-            box-shadow: 0 0 0 0.18rem rgba(201, 168, 76, 0.11);
+            border-color: var(--tailor-gold);
+            background-color: #ffffff;
+            box-shadow: 0 0 0 0.18rem rgba(215, 154, 30, 0.16);
         }
 
-        .entry-hidden-select {
-            position: absolute !important;
-            width: 1px !important;
-            height: 1px !important;
-            padding: 0 !important;
-            margin: -1px !important;
-            overflow: hidden !important;
-            clip: rect(0, 0, 0, 0) !important;
-            white-space: nowrap !important;
-            border: 0 !important;
+        .entry-field .form-control.is-invalid,
+        .entry-field .form-select.is-invalid {
+            border-color: #dc3545;
+            box-shadow: 0 0 0 0.14rem rgba(220, 53, 69, 0.08);
         }
 
-        .entry-pill-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.6rem;
-        }
-
-        .entry-pill {
-            position: relative;
-            min-height: 3rem;
-            padding: 0.68rem 0.8rem;
-            border-radius: 0.72rem;
-            border: 1px solid rgba(17, 17, 17, 0.08);
-            background: #ffffff;
-            cursor: pointer;
-            transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .entry-pill:hover {
-            border-color: rgba(17, 17, 17, 0.2);
-        }
-
-        .entry-pill.is-active {
-            background: #111111;
-            border-color: #111111;
-            box-shadow: none;
-        }
-
-        .entry-pill input {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .entry-pill-title {
-            font-size: 0.86rem;
-            font-weight: 700;
-            color: #111111;
-        }
-
-        .entry-pill-copy {
-            margin-top: 0.14rem;
-            color: var(--tailor-muted);
-            font-size: 0.72rem;
-            line-height: 1.28;
-        }
-
-        .entry-pill-price {
-            margin-top: 0.32rem;
-            font-family: "Playfair Display", "Cormorant Garamond", serif;
-            font-size: 0.94rem;
-            color: #111111;
-        }
-
-        .entry-pill.is-active .entry-pill-title,
-        .entry-pill.is-active .entry-pill-copy,
-        .entry-pill.is-active .entry-pill-price {
-            color: #ffffff;
+        .entry-field .form-select {
+            padding-right: 2.65rem;
+            background-image: var(--bs-form-select-bg-img), var(--bs-form-select-bg-icon, none);
+            background-repeat: no-repeat;
+            background-position: right 0.9rem center;
+            background-size: 16px 12px;
         }
 
         .entry-compact-grid {
@@ -361,7 +306,6 @@
                 justify-content: flex-start;
             }
 
-            .entry-pill-grid,
             .entry-compact-grid {
                 grid-template-columns: repeat(2, minmax(0, 1fr));
             }
@@ -373,7 +317,6 @@
             }
 
             .entry-grid,
-            .entry-pill-grid,
             .entry-compact-grid {
                 grid-template-columns: 1fr;
             }
@@ -433,25 +376,16 @@
 
                         <div class="entry-field entry-span-2">
                             <label for="thobe_category" class="form-label">Category *</label>
-                            <select id="thobe_category" name="thobe_category" class="form-select entry-hidden-select @error('thobe_category') is-invalid @enderror" required>
+                            <select id="thobe_category" name="thobe_category" class="form-select @error('thobe_category') is-invalid @enderror" required>
                                 <option value="">Select category</option>
-                                @foreach ($categoryCards as $card)
-                                    <option value="{{ $card['key'] }}" @selected($card['selected'])>{{ $card['label'] }}</option>
+                                @foreach ($categoryDropdownOptions as $category)
+                                    <option value="{{ $category['key'] }}" @selected($category['selected'])>
+                                        {{ $category['label'] }} - {{ $category['formatted_price'] }}
+                                    </option>
                                 @endforeach
                             </select>
-
-                            <div class="entry-pill-grid">
-                                @foreach ($categoryCards as $card)
-                                    <label class="entry-pill {{ $card['selected'] ? 'is-active' : '' }}" data-category-option data-value="{{ $card['key'] }}">
-                                        <input type="radio" name="thobe_category_card" value="{{ $card['key'] }}" {{ $card['selected'] ? 'checked' : '' }}>
-                                        <div class="entry-pill-title">{{ $card['label'] }}</div>
-                                        <div class="entry-pill-copy">{{ $card['description'] }}</div>
-                                        <div class="entry-pill-price">{{ $card['formatted_price'] }}</div>
-                                    </label>
-                                @endforeach
-                            </div>
                             @error('thobe_category')
-                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                                <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
 
@@ -511,7 +445,6 @@
             const categorySelect = document.getElementById('thobe_category');
             const quantityInput = document.getElementById('quantity');
             const totalPrice = document.getElementById('total-price');
-            const categoryOptions = document.querySelectorAll('[data-category-option]');
             const stepButtons = document.querySelectorAll('[data-step]');
 
             const updateTotal = () => {
@@ -519,25 +452,6 @@
                 const qty = Math.max(Number(quantityInput.value || 1), 1);
                 totalPrice.textContent = (selectedPrice * qty).toFixed(0);
             };
-
-            const setActiveCategory = (value) => {
-                categoryOptions.forEach((option) => {
-                    const isActive = option.dataset.value === value;
-                    option.classList.toggle('is-active', isActive);
-
-                    const radio = option.querySelector('input');
-                    if (radio) {
-                        radio.checked = isActive;
-                    }
-                });
-
-                categorySelect.value = value;
-                updateTotal();
-            };
-
-            categoryOptions.forEach((option) => {
-                option.addEventListener('click', () => setActiveCategory(option.dataset.value));
-            });
 
             stepButtons.forEach((button) => {
                 button.addEventListener('click', () => {
@@ -556,7 +470,7 @@
                 updateTotal();
             });
 
-            categorySelect.addEventListener('change', () => setActiveCategory(categorySelect.value));
+            categorySelect.addEventListener('change', updateTotal);
             updateTotal();
         })();
     </script>
