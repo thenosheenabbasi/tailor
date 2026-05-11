@@ -481,7 +481,7 @@ class TailorAccessTest extends TestCase
         $response->assertSee('7');
     }
 
-    public function test_report_category_summary_is_hidden_without_active_filters_and_visible_with_filters(): void
+    public function test_report_category_summary_is_hidden_without_active_filters_and_when_category_filter_is_active(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Summary Filter User']);
@@ -513,9 +513,10 @@ class TailorAccessTest extends TestCase
         ]));
 
         $filteredResponse->assertOk();
-        $filteredResponse->assertSee('Selected Category Summary');
-        $filteredResponse->assertSee('data-category-summary="embroidery"', false);
-        $filteredResponse->assertSee('data-category-amount="25.00"', false);
+        $filteredResponse->assertDontSee('All Categories Summary');
+        $filteredResponse->assertDontSee('Selected Category Summary');
+        $filteredResponse->assertDontSee('data-category-summary="embroidery"', false);
+        $filteredResponse->assertDontSee('data-category-amount="25.00"', false);
     }
 
     public function test_manager_can_filter_invoices_by_category(): void

@@ -1452,13 +1452,13 @@
                             </form>
                         </div>
 
-                        @if ($hasActiveReportFilters)
+                        @if ($hasActiveReportFilters && $filters['thobe_category'] === '')
                             <div class="report-summary-section">
                                 <div class="category-summary-panel">
                                     <div class="category-summary-body" id="category-summary-body">
                                         <div class="mb-3">
                                             <h3 class="category-summary-title mb-1">
-                                                {{ $filters['thobe_category'] === '' ? 'All Categories Summary' : 'Selected Category Summary' }}
+                                                All Categories Summary
                                             </h3>
                                             <p class="category-summary-copy mb-0">
                                                 Quantity and amount are calculated based on the current report filters.
