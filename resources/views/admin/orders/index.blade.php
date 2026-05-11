@@ -459,7 +459,7 @@
         .table-card .table {
             color: var(--tailor-text);
             margin-bottom: 0;
-            min-width: 1120px;
+            min-width: 1260px;
             border-collapse: separate;
             border-spacing: 0;
         }
@@ -566,6 +566,13 @@
             white-space: nowrap;
             min-width: 178px;
             font-size: 0.8rem;
+        }
+
+        .tailor-cell {
+            min-width: 150px;
+            color: var(--tailor-white);
+            font-weight: 700;
+            white-space: nowrap;
         }
 
         .note-col {
@@ -1507,6 +1514,7 @@
                             <tr>
                                 <th>Invoice #</th>
                                 <th>Fatora #</th>
+                                <th>Tailor Name</th>
                                 <th>Date</th>
                                 <th>Category</th>
                                 <th>Qty</th>
@@ -1522,9 +1530,11 @@
                         <tbody>
                             @forelse ($orders as $order)
                                 @php
+                                    $displayTailorName = $order->assignedUser?->name ?? $order->tailor_name ?? 'Not assigned';
                                     $detailPayload = [
                                         'invoice_number' => $order->invoice_number,
                                         'fatora_number' => $order->fatora_number ?: 'N/A',
+                                        'tailor_name' => $displayTailorName,
                                         'category' => $order->category_label,
                                         'quantity' => (string) $order->quantity,
                                         'order_date' => $order->order_date->format('d M Y h:i A'),
@@ -1533,7 +1543,7 @@
                                         'status' => $order->status_label,
                                         'status_value' => $order->status,
                                         'completed_at' => optional($order->completed_at)->format('d M Y h:i A') ?: 'Not completed yet',
-                                        'assigned_tailor' => $order->assignedUser?->name ?? 'Not assigned',
+                                        'assigned_tailor' => $displayTailorName,
                                         'added_by' => $order->creator?->name ?? 'N/A',
                                         'note' => $order->note ?: 'No note added',
                                         'update_status_url' => route('admin.orders.update-status', $order),
@@ -1542,6 +1552,7 @@
                                 <tr>
                                     <td>{{ $order->invoice_number }}</td>
                                     <td>{{ $order->fatora_number ?: 'N/A' }}</td>
+                                    <td class="tailor-cell">{{ $displayTailorName }}</td>
                                     <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
                                     <td>{{ $order->category_label }}</td>
                                     <td>{{ $order->quantity }}</td>
@@ -1598,12 +1609,12 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 10 : 9 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
+                                    <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 11 : 10 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
                                 </tr>
                             @endforelse
                             @if ($pageMode === 'report' && $orders->count())
                                 <tr class="table-summary-row">
-                                    <td colspan="5">
+                                    <td colspan="6">
                                         <span class="summary-label">Report Summary</span>
                                         <span class="table-summary-meta">Filtered totals for the current report view.</span>
                                     </td>

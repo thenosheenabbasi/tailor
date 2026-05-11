@@ -406,6 +406,7 @@
                 <table class="detail-table">
                     <thead>
                         <tr>
+                            <th>Tailor Name</th>
                             <th>Thobe Category</th>
                             <th>Quantity</th>
                             <th>Order Date</th>
@@ -415,6 +416,7 @@
                     </thead>
                     <tbody>
                         <tr>
+                            <td>{{ $order->assignedUser?->name ?? $order->tailor_name }}</td>
                             <td>{{ $order->category_label }}</td>
                             <td>{{ $order->quantity }}</td>
                             <td>{{ $order->order_date->format('d M Y h:i A') }}</td>

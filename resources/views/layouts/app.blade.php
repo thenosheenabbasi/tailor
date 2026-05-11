@@ -271,6 +271,36 @@
             font-weight: 800;
         }
 
+        .topbar-language {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            min-height: 42px;
+            padding: 0 0.72rem;
+            border: 1px solid rgba(17, 17, 17, 0.12);
+            border-radius: 999px;
+            background: #ffffff;
+            color: var(--tailor-text);
+        }
+
+        .topbar-language-label {
+            color: var(--tailor-muted);
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .topbar-language-select {
+            border: 0;
+            background: transparent;
+            color: var(--tailor-text);
+            font-size: 0.8rem;
+            font-weight: 700;
+            outline: 0;
+            cursor: pointer;
+        }
+
         .topbar-profile {
             position: relative;
             display: flex;
@@ -821,6 +851,14 @@
                     </div>
 
                     <div class="topbar-actions">
+                        <label class="topbar-language">
+                            <span class="topbar-language-label">Language</span>
+                            <select class="topbar-language-select" data-language-select aria-label="Language">
+                                <option value="en">English</option>
+                                <option value="ar">Arabic</option>
+                            </select>
+                        </label>
+
                         <button type="button" class="topbar-alert" aria-label="Notifications">
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                                 <path d="M15 17h5l-1.4-1.4A2 2 0 0 1 18 14.2V11a6 6 0 1 0-12 0v3.2a2 2 0 0 1-.6 1.4L4 17h5"></path>
@@ -930,6 +968,19 @@
             const profileMenu = document.querySelector('[data-profile-menu]');
             const profileToggle = document.querySelector('[data-profile-toggle]');
             const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+            const languageSelect = document.querySelector('[data-language-select]');
+
+            if (languageSelect) {
+                const savedLanguage = localStorage.getItem('tailor_language') || 'en';
+                languageSelect.value = savedLanguage;
+                document.documentElement.lang = savedLanguage === 'ar' ? 'ar' : 'en';
+
+                languageSelect.addEventListener('change', () => {
+                    const selectedLanguage = languageSelect.value;
+                    localStorage.setItem('tailor_language', selectedLanguage);
+                    document.documentElement.lang = selectedLanguage === 'ar' ? 'ar' : 'en';
+                });
+            }
 
             toasts.forEach((toast, index) => {
                 window.setTimeout(() => toast.classList.add('show'), 80 + (index * 120));

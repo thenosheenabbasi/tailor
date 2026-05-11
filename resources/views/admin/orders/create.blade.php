@@ -7,6 +7,11 @@
         $currentQuantity = (int) old('quantity', $order?->quantity ?? 1);
         $initialFatora = old('fatora_number', $order?->fatora_number ?? 'F-1007');
         $initialDate = old('order_date', optional($order?->order_date)->format('Y-m-d\TH:i') ?? now()->format('Y-m-d\TH:i'));
+        try {
+            $initialDisplayDate = filled($initialDate) ? \Illuminate\Support\Carbon::parse($initialDate)->format('m/d/Y h:i A') : '';
+        } catch (\Throwable $exception) {
+            $initialDisplayDate = $initialDate;
+        }
         $categoryDropdownOptions = collect(\App\Models\TailorOrder::categories())->map(function (array $category, string $key) use ($currentCategory) {
             return [
                 'key' => $key,
@@ -253,6 +258,156 @@
             resize: vertical;
         }
 
+        .entry-date-picker {
+            position: relative;
+        }
+
+        .entry-date-control {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 2.7rem;
+            align-items: stretch;
+        }
+
+        .entry-field .entry-date-control .form-control {
+            border-top-right-radius: 0 !important;
+            border-bottom-right-radius: 0 !important;
+        }
+
+        .entry-date-toggle {
+            min-height: 2.7rem;
+            border: 1.5px solid rgba(17, 17, 17, 0.2);
+            border-left: 0;
+            border-radius: 0 0.68rem 0.68rem 0;
+            background: #ffffff;
+            color: #111111;
+            font-size: 1rem;
+            font-weight: 800;
+        }
+
+        .entry-date-popover {
+            position: absolute;
+            top: calc(100% + 0.45rem);
+            left: 0;
+            z-index: 40;
+            width: min(92vw, 21rem);
+            padding: 0.8rem;
+            border: 1px solid rgba(17, 17, 17, 0.14);
+            border-radius: 0.85rem;
+            background: #ffffff;
+            color: #111111;
+            box-shadow: 0 24px 46px rgba(17, 17, 17, 0.18);
+            direction: ltr;
+        }
+
+        .entry-date-popover[hidden] {
+            display: none;
+        }
+
+        .entry-date-header,
+        .entry-date-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .entry-date-month {
+            font-size: 0.95rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .entry-date-selectors {
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(5.6rem, 0.65fr);
+            gap: 0.35rem;
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+
+        .entry-date-selector {
+            min-width: 0;
+            height: 2.05rem;
+            border: 1px solid rgba(17, 17, 17, 0.16);
+            border-radius: 0.5rem;
+            background: #ffffff;
+            color: #111111;
+            font-size: 0.82rem;
+            font-weight: 700;
+            padding: 0 0.35rem;
+        }
+
+        .entry-date-nav,
+        .entry-date-day,
+        .entry-date-action {
+            border: 0;
+            background: transparent;
+            color: #111111;
+            font: inherit;
+        }
+
+        .entry-date-nav {
+            width: 2.05rem;
+            height: 2.05rem;
+            border-radius: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1;
+        }
+
+        .entry-date-nav:hover,
+        .entry-date-day:hover,
+        .entry-date-action:hover {
+            background: #f4efe6;
+        }
+
+        .entry-date-weekdays,
+        .entry-date-days {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.22rem;
+        }
+
+        .entry-date-weekdays {
+            margin-top: 0.72rem;
+            color: #111111;
+            font-size: 0.76rem;
+            font-weight: 800;
+            text-align: center;
+        }
+
+        .entry-date-days {
+            margin-top: 0.3rem;
+        }
+
+        .entry-date-day {
+            min-height: 2.1rem;
+            border-radius: 0.46rem;
+            font-size: 0.9rem;
+            font-weight: 700;
+        }
+
+        .entry-date-day.muted {
+            color: #8f897f;
+            font-weight: 500;
+        }
+
+        .entry-date-day.selected {
+            background: #006ad4;
+            color: #ffffff;
+        }
+
+        .entry-date-footer {
+            margin-top: 0.6rem;
+        }
+
+        .entry-date-action {
+            min-height: 2rem;
+            padding: 0 0.45rem;
+            border-radius: 0.45rem;
+            color: #006ad4;
+            font-weight: 700;
+        }
+
         .entry-footer {
             display: flex;
             justify-content: flex-end;
@@ -328,6 +483,10 @@
             .entry-ghost-btn,
             .entry-save-btn {
                 width: 100%;
+            }
+
+            .entry-date-popover {
+                width: min(86vw, 21rem);
             }
         }
     </style>
@@ -405,7 +564,30 @@
 
                                 <div class="entry-field">
                                     <label for="order_date" class="form-label">Date</label>
-                                    <input type="datetime-local" id="order_date" name="order_date" step="60" value="{{ $initialDate }}" class="form-control @error('order_date') is-invalid @enderror" required>
+                                    <div class="entry-date-picker" data-date-picker>
+                                        <input type="hidden" id="order_date" name="order_date" value="{{ $initialDate }}" required>
+                                        <div class="entry-date-control">
+                                            <input type="text" id="order_date_display" value="{{ $initialDisplayDate }}" class="form-control @error('order_date') is-invalid @enderror" autocomplete="off" placeholder="Select Islamic date" data-date-display readonly required>
+                                            <button type="button" class="entry-date-toggle" data-date-toggle aria-label="Open Islamic calendar" aria-expanded="false">▾</button>
+                                        </div>
+                                        <div class="entry-date-popover" data-date-popover role="dialog" aria-label="Choose Islamic date" lang="en" dir="ltr" hidden>
+                                            <div class="entry-date-header">
+                                                <button type="button" class="entry-date-nav" data-month-prev aria-label="Previous month">&lt;</button>
+                                                <div class="entry-date-selectors">
+                                                    <select class="entry-date-selector" data-hijri-month aria-label="Islamic month"></select>
+                                                    <input type="number" class="entry-date-selector" data-hijri-year aria-label="Islamic year" min="1300" max="1600" step="1">
+                                                </div>
+                                                <button type="button" class="entry-date-nav" data-month-next aria-label="Next month">&gt;</button>
+                                            </div>
+                                            <div class="entry-date-month" data-month-label></div>
+                                            <div class="entry-date-weekdays" data-weekdays></div>
+                                            <div class="entry-date-days" data-days></div>
+                                            <div class="entry-date-footer">
+                                                <button type="button" class="entry-date-action" data-date-clear>Clear</button>
+                                                <button type="button" class="entry-date-action" data-date-today>Today</button>
+                                            </div>
+                                        </div>
+                                    </div>
                                     @error('order_date')
                                         <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
@@ -446,11 +628,259 @@
             const quantityInput = document.getElementById('quantity');
             const totalPrice = document.getElementById('total-price');
             const stepButtons = document.querySelectorAll('[data-step]');
+            const datePicker = document.querySelector('[data-date-picker]');
+            const dateDisplay = document.querySelector('[data-date-display]');
+            const dateInput = document.getElementById('order_date');
+            const dateToggle = document.querySelector('[data-date-toggle]');
+            const datePopover = document.querySelector('[data-date-popover]');
+            const monthLabel = document.querySelector('[data-month-label]');
+            const weekdaysWrap = document.querySelector('[data-weekdays]');
+            const daysWrap = document.querySelector('[data-days]');
+            const hijriMonthSelect = document.querySelector('[data-hijri-month]');
+            const hijriYearSelect = document.querySelector('[data-hijri-year]');
+            const hijriMonthFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura-nu-latn', {
+                month: 'long',
+                year: 'numeric',
+            });
+            const hijriPartsFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura-nu-latn', {
+                day: 'numeric',
+                month: 'numeric',
+                year: 'numeric',
+            });
+            const hijriDisplayFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura-nu-latn', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true,
+            });
+            const hijriDayFormatter = new Intl.NumberFormat('en-US-u-nu-latn', {
+                useGrouping: false,
+            });
+            const calendarWeekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            const hijriMonths = [
+                'Muharram',
+                'Safar',
+                'Rabi al-Awwal',
+                'Rabi al-Thani',
+                'Jumada I',
+                'Jumada II',
+                'Rajab',
+                'Shaʻban',
+                'Ramadan',
+                'Shawwal',
+                'Dhuʻl-Qiʻdah',
+                'Dhuʻl-Hijjah',
+            ].map((label, index) => ({ value: index + 1, label }));
 
             const updateTotal = () => {
                 const selectedPrice = Number(prices[categorySelect.value] || 0);
                 const qty = Math.max(Number(quantityInput.value || 1), 1);
                 totalPrice.textContent = (selectedPrice * qty).toFixed(0);
+            };
+
+            const pad = (value) => String(value).padStart(2, '0');
+
+            const formatDisplayDate = (date) => hijriDisplayFormatter.format(date);
+
+            const formatSubmitDate = (date) => {
+                return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+            };
+
+            const parseSubmitDate = (value) => {
+                if (!value) {
+                    return null;
+                }
+
+                const [datePart, timePart = '00:00'] = value.split('T');
+                const [year, month, day] = datePart.split('-').map(Number);
+                const [hour = 0, minute = 0] = timePart.split(':').map(Number);
+
+                if ([year, month, day, hour, minute].some(Number.isNaN)) {
+                    return null;
+                }
+
+                return new Date(year, month - 1, day, hour, minute);
+            };
+
+            const getHijriParts = (date) => {
+                const parts = hijriPartsFormatter.formatToParts(date).reduce((carry, part) => {
+                    if (['day', 'month', 'year'].includes(part.type)) {
+                        carry[part.type] = Number(part.value);
+                    }
+
+                    return carry;
+                }, {});
+
+                return {
+                    day: parts.day,
+                    month: parts.month,
+                    year: parts.year,
+                };
+            };
+
+            const addHijriMonths = (year, month, amount) => {
+                const monthIndex = (year * 12) + (month - 1) + amount;
+
+                return {
+                    year: Math.floor(monthIndex / 12),
+                    month: (monthIndex % 12) + 1,
+                };
+            };
+
+            const findGregorianForHijri = (year, month, day, baseDate = selectedDate) => {
+                const base = new Date(baseDate);
+                base.setHours(12, 0, 0, 0);
+
+                const baseHijri = getHijriParts(base);
+                const estimatedOffset = Math.round(
+                    ((year - baseHijri.year) * 354.367)
+                    + ((month - baseHijri.month) * 29.53)
+                    + (day - baseHijri.day)
+                );
+                const startDate = new Date(base);
+                startDate.setDate(base.getDate() + estimatedOffset - 20);
+
+                for (let offset = 0; offset <= 40; offset += 1) {
+                    const candidate = new Date(startDate);
+                    candidate.setDate(startDate.getDate() + offset);
+
+                    const candidateHijri = getHijriParts(candidate);
+
+                    if (
+                        candidateHijri.year === year
+                        && candidateHijri.month === month
+                        && candidateHijri.day === day
+                    ) {
+                        return candidate;
+                    }
+                }
+
+                return null;
+            };
+
+            const isSameHijriMonth = (date, year, month) => {
+                const hijri = getHijriParts(date);
+
+                return hijri.year === year && hijri.month === month;
+            };
+
+            const syncDateSelectors = () => {
+                if (hijriMonthSelect && hijriMonthSelect.options.length === 0) {
+                    hijriMonths.forEach((month) => {
+                        const option = document.createElement('option');
+                        option.value = String(month.value);
+                        option.textContent = month.label;
+                        hijriMonthSelect.appendChild(option);
+                    });
+                }
+
+                if (hijriMonthSelect) {
+                    hijriMonthSelect.value = String(visibleHijriMonth);
+                }
+
+                if (hijriYearSelect) {
+                    hijriYearSelect.value = String(visibleHijriYear);
+                }
+            };
+
+            let selectedDate = parseSubmitDate(dateInput?.value) || new Date();
+            let selectedHijri = getHijriParts(selectedDate);
+            let visibleHijriYear = selectedHijri.year;
+            let visibleHijriMonth = selectedHijri.month;
+
+            const sameDate = (left, right) => (
+                left.getFullYear() === right.getFullYear()
+                && left.getMonth() === right.getMonth()
+                && left.getDate() === right.getDate()
+            );
+
+            const setSelectedDate = (date) => {
+                selectedDate = date;
+                selectedHijri = getHijriParts(date);
+                visibleHijriYear = selectedHijri.year;
+                visibleHijriMonth = selectedHijri.month;
+
+                if (dateInput) {
+                    dateInput.value = formatSubmitDate(date);
+                }
+
+                if (dateDisplay) {
+                    dateDisplay.value = formatDisplayDate(date);
+                }
+
+                renderCalendar();
+            };
+
+            const renderCalendar = () => {
+                if (!monthLabel || !weekdaysWrap || !daysWrap) {
+                    return;
+                }
+
+                const firstOfMonth = findGregorianForHijri(visibleHijriYear, visibleHijriMonth, 1);
+
+                if (!firstOfMonth) {
+                    return;
+                }
+
+                const firstGridDate = new Date(firstOfMonth);
+                firstGridDate.setDate(firstOfMonth.getDate() - firstOfMonth.getDay());
+                monthLabel.textContent = hijriMonthFormatter.format(firstOfMonth);
+                syncDateSelectors();
+
+                weekdaysWrap.innerHTML = '';
+                calendarWeekdays.forEach((weekday) => {
+                    const weekdayEl = document.createElement('div');
+                    weekdayEl.textContent = weekday;
+                    weekdaysWrap.appendChild(weekdayEl);
+                });
+
+                daysWrap.innerHTML = '';
+
+                for (let index = 0; index < 42; index += 1) {
+                    const date = new Date(firstGridDate);
+                    date.setDate(firstGridDate.getDate() + index);
+
+                    const button = document.createElement('button');
+                    const hijriDate = getHijriParts(date);
+
+                    button.type = 'button';
+                    button.className = 'entry-date-day';
+                    button.textContent = hijriDayFormatter.format(hijriDate.day);
+                    button.dataset.year = String(date.getFullYear());
+                    button.dataset.month = String(date.getMonth());
+                    button.dataset.day = String(date.getDate());
+
+                    if (!isSameHijriMonth(date, visibleHijriYear, visibleHijriMonth)) {
+                        button.classList.add('muted');
+                    }
+
+                    if (sameDate(date, selectedDate)) {
+                        button.classList.add('selected');
+                    }
+
+                    daysWrap.appendChild(button);
+                }
+            };
+
+            const openCalendar = () => {
+                if (!datePopover || !dateToggle) {
+                    return;
+                }
+
+                datePopover.hidden = false;
+                dateToggle.setAttribute('aria-expanded', 'true');
+                renderCalendar();
+            };
+
+            const closeCalendar = () => {
+                if (!datePopover || !dateToggle) {
+                    return;
+                }
+
+                datePopover.hidden = true;
+                dateToggle.setAttribute('aria-expanded', 'false');
             };
 
             stepButtons.forEach((button) => {
@@ -471,7 +901,102 @@
             });
 
             categorySelect.addEventListener('change', updateTotal);
+            dateDisplay?.addEventListener('focus', openCalendar);
+            dateDisplay?.addEventListener('click', openCalendar);
+            dateDisplay?.addEventListener('change', () => {
+                dateDisplay.value = selectedDate ? formatDisplayDate(selectedDate) : '';
+            });
+
+            dateToggle?.addEventListener('click', () => {
+                if (datePopover?.hidden) {
+                    openCalendar();
+                    return;
+                }
+
+                closeCalendar();
+            });
+
+            document.querySelector('[data-month-prev]')?.addEventListener('click', () => {
+                const previousMonth = addHijriMonths(visibleHijriYear, visibleHijriMonth, -1);
+                visibleHijriYear = previousMonth.year;
+                visibleHijriMonth = previousMonth.month;
+
+                renderCalendar();
+            });
+
+            document.querySelector('[data-month-next]')?.addEventListener('click', () => {
+                const nextMonth = addHijriMonths(visibleHijriYear, visibleHijriMonth, 1);
+                visibleHijriYear = nextMonth.year;
+                visibleHijriMonth = nextMonth.month;
+
+                renderCalendar();
+            });
+
+            hijriMonthSelect?.addEventListener('change', () => {
+                visibleHijriMonth = Number(hijriMonthSelect.value);
+                renderCalendar();
+            });
+
+            hijriYearSelect?.addEventListener('change', () => {
+                const nextYear = Number(hijriYearSelect.value);
+
+                if (!Number.isNaN(nextYear)) {
+                    visibleHijriYear = nextYear;
+                }
+
+                renderCalendar();
+            });
+
+            daysWrap?.addEventListener('click', (event) => {
+                const button = event.target.closest('[data-day]');
+
+                if (!button) {
+                    return;
+                }
+
+                const nextDate = new Date(
+                    Number(button.dataset.year),
+                    Number(button.dataset.month),
+                    Number(button.dataset.day),
+                    selectedDate.getHours(),
+                    selectedDate.getMinutes(),
+                );
+
+                setSelectedDate(nextDate);
+                closeCalendar();
+            });
+
+            document.querySelector('[data-date-clear]')?.addEventListener('click', () => {
+                if (dateInput) {
+                    dateInput.value = '';
+                }
+
+                if (dateDisplay) {
+                    dateDisplay.value = '';
+                }
+
+                closeCalendar();
+            });
+
+            document.querySelector('[data-date-today]')?.addEventListener('click', () => {
+                setSelectedDate(new Date());
+                closeCalendar();
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!datePicker?.contains(event.target)) {
+                    closeCalendar();
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape') {
+                    closeCalendar();
+                }
+            });
+
             updateTotal();
+            setSelectedDate(selectedDate);
         })();
     </script>
 @endsection
