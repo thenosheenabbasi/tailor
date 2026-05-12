@@ -43,6 +43,10 @@
             overflow-x: hidden;
         }
 
+        html {
+            overflow-x: hidden;
+        }
+
         h1, h2, h3, h4, h5, h6 {
             margin: 0;
             color: var(--tailor-text);
@@ -56,12 +60,17 @@
 
         .dashboard-shell {
             min-height: 100vh;
+            max-width: 100%;
+            overflow-x: hidden;
         }
 
         .app-body {
             display: grid;
             grid-template-columns: 257px minmax(0, 1fr);
+            width: 100%;
+            max-width: 100%;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .dashboard-shell.sidebar-collapsed .app-body {
@@ -71,6 +80,7 @@
         .sidebar-panel {
             position: sticky;
             top: 0;
+            z-index: 80;
             height: 100vh;
             display: flex;
             flex-direction: column;
@@ -179,20 +189,26 @@
         .workspace-main {
             display: flex;
             flex-direction: column;
+            width: 100%;
+            max-width: 100%;
             min-width: 0;
             min-height: 100vh;
+            overflow-x: hidden;
         }
 
         .topbar {
             position: sticky;
             top: 0;
             z-index: 50;
-            height: 82px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            min-height: 82px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             gap: 1rem;
-            padding: 0 1.7rem 0 1.5rem;
+            padding: 0.85rem 1.7rem 0.85rem 1.5rem;
             background: rgba(255, 255, 255, 0.84);
             backdrop-filter: blur(18px);
             border-bottom: 1px solid rgba(17, 17, 17, 0.05);
@@ -202,6 +218,7 @@
         .topbar-brand {
             display: flex;
             align-items: center;
+            flex: 1 1 auto;
             gap: 1rem;
             min-width: 0;
         }
@@ -225,6 +242,10 @@
         }
 
         .topbar-page-title {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             font-size: 1rem;
             font-weight: 700;
             line-height: 1;
@@ -233,7 +254,9 @@
         .topbar-actions {
             display: flex;
             align-items: center;
+            flex: 0 1 auto;
             gap: 0.85rem;
+            min-width: 0;
         }
 
         .topbar-alert {
@@ -310,6 +333,7 @@
         .topbar-profile-toggle {
             display: flex;
             align-items: center;
+            min-width: 0;
             gap: 0.8rem;
             border: 0;
             background: transparent;
@@ -343,10 +367,14 @@
         .topbar-profile-copy {
             display: grid;
             gap: 0.1rem;
+            min-width: 0;
             text-align: left;
         }
 
         .topbar-profile-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
             font-size: 0.8rem;
             font-weight: 700;
             line-height: 1.1;
@@ -709,43 +737,226 @@
             }
 
             .sidebar-panel {
-                position: relative;
-                height: auto;
+                position: fixed;
+                inset: 0 auto 0 0;
+                z-index: 1000;
+                width: min(82vw, 288px);
+                height: 100dvh;
+                max-height: none;
+                gap: 0.85rem;
+                padding: 0.9rem 0.75rem;
+                overflow-y: auto;
+                transform: translateX(-105%);
+                transition: transform 0.24s ease;
             }
 
             .workspace-content {
-                padding: 1rem 1rem 5.5rem;
+                padding: 0.85rem 0.75rem 5.8rem;
             }
 
             .dashboard-footer {
                 left: 0;
             }
+
+            .sidebar-brand {
+                min-height: 72px;
+                padding: 0.3rem;
+            }
+
+            .sidebar-brand img {
+                width: 112px;
+            }
+
+            .dashboard-shell.sidebar-collapsed .sidebar-brand img {
+                width: 112px;
+            }
+
+            .sidebar-section-label {
+                display: block;
+            }
+
+            .sidebar-link-label {
+                display: inline;
+            }
+
+            .dashboard-shell.sidebar-collapsed .sidebar-section-label {
+                display: block;
+            }
+
+            .dashboard-shell.sidebar-collapsed .sidebar-link-label {
+                display: inline;
+            }
+
+            .sidebar-nav {
+                display: grid;
+                gap: 0.24rem;
+            }
+
+            .sidebar-link,
+            .sidebar-logout-btn {
+                width: 100%;
+                min-height: 46px;
+                justify-content: flex-start;
+                gap: 0.68rem;
+                padding: 0.68rem 0.82rem;
+                border-radius: 12px;
+            }
+
+            .dashboard-shell.sidebar-collapsed .sidebar-link,
+            .dashboard-shell.sidebar-collapsed .sidebar-logout-btn {
+                justify-content: flex-start;
+                padding: 0.68rem 0.82rem;
+            }
+
+            .sidebar-link:hover {
+                transform: none;
+            }
+
+            .sidebar-logout {
+                margin-top: auto;
+                padding-top: 0.8rem;
+                border-top: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .topbar {
+                top: 0;
+            }
+
+            .sidebar-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 990;
+                border: 0;
+                padding: 0;
+                background: rgba(0, 0, 0, 0.42);
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.24s ease;
+            }
+
+            .dashboard-shell.mobile-sidebar-open .sidebar-panel {
+                transform: translateX(0);
+            }
+
+            .dashboard-shell.mobile-sidebar-open .sidebar-backdrop {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            body.mobile-sidebar-lock {
+                overflow: hidden;
+            }
         }
 
         @media (max-width: 767.98px) {
+            :root {
+                --dashboard-base-text: 0.86rem;
+                --dashboard-button-padding-y: 0.68rem;
+                --dashboard-button-padding-x: 0.9rem;
+            }
+
             .topbar {
-                height: auto;
-                padding: 0.9rem 1rem;
-                align-items: flex-start;
-                flex-wrap: wrap;
+                min-height: 58px;
+                gap: 0.55rem;
+                padding: 0.58rem 0.68rem;
+                align-items: center;
+                flex-wrap: nowrap;
+            }
+
+            .topbar-brand {
+                flex: 1 1 auto;
+                width: auto;
+                gap: 0.55rem;
+                min-width: 0;
+            }
+
+            .topbar-page-title {
+                flex: 1;
+                text-align: left;
+                font-size: 0.92rem;
+            }
+
+            .topbar-menu-toggle {
+                width: 38px;
+                height: 38px;
+                flex: 0 0 auto;
             }
 
             .topbar-actions {
-                width: 100%;
-                justify-content: space-between;
+                width: auto;
+                justify-content: flex-end;
+                gap: 0.42rem;
+                flex: 0 0 auto;
+            }
+
+            .topbar-language {
+                min-height: 38px;
+                padding-inline: 0.48rem;
+                border-radius: 11px;
+            }
+
+            .topbar-language-label {
+                display: none;
+            }
+
+            .topbar-language-select {
+                max-width: 4.9rem;
+                font-size: 0.76rem;
+            }
+
+            .topbar-alert,
+            .topbar-avatar {
+                width: 38px;
+                height: 38px;
+            }
+
+            .topbar-profile-toggle {
+                gap: 0.35rem;
             }
 
             .topbar-profile-copy {
                 display: none;
             }
 
+            .topbar-profile-menu {
+                right: 0;
+                min-width: min(220px, calc(100vw - 1.5rem));
+            }
+
             .dashboard-footer {
+                position: static;
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 0.18rem;
+                padding: 0.62rem 0.75rem 0.72rem;
+                font-size: 0.72rem;
+                box-shadow: none;
+            }
+
+            .workspace-content {
+                padding: 0.72rem 0.62rem 0.85rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .topbar {
+                padding-inline: 0.55rem;
+            }
+
+            .topbar-language {
+                display: none;
+            }
+
+            .topbar-page-title {
+                font-size: 0.86rem;
             }
         }
 
         @media (min-width: 992px) {
+            .sidebar-backdrop {
+                display: none;
+            }
+
             html,
             body {
                 height: 100%;
@@ -771,6 +982,42 @@
                 min-height: 0;
                 overflow-y: auto;
                 overscroll-behavior: contain;
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .dashboard-shell > .app-body > .sidebar-panel {
+                position: fixed !important;
+                top: 0 !important;
+                right: auto !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                z-index: 1000 !important;
+                width: min(82vw, 288px) !important;
+                height: 100dvh !important;
+                min-height: 0 !important;
+                max-height: none !important;
+                display: none !important;
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+
+            .dashboard-shell.mobile-sidebar-open > .app-body > .sidebar-panel {
+                display: flex !important;
+                transform: none !important;
+            }
+
+            .dashboard-shell > .app-body > .sidebar-backdrop {
+                display: none !important;
+            }
+
+            .dashboard-shell.mobile-sidebar-open > .app-body > .sidebar-backdrop {
+                display: block !important;
+            }
+
+            .dashboard-shell > .app-body > .workspace-main {
+                width: 100% !important;
+                min-width: 0 !important;
             }
         }
     </style>
@@ -865,6 +1112,7 @@
                     </button>
                 </form>
             </aside>
+            <button type="button" class="sidebar-backdrop" data-sidebar-close aria-label="Close sidebar"></button>
 
             <main class="workspace-main">
                 <header class="topbar">
@@ -997,7 +1245,9 @@
             const profileMenu = document.querySelector('[data-profile-menu]');
             const profileToggle = document.querySelector('[data-profile-toggle]');
             const sidebarToggle = document.querySelector('[data-sidebar-toggle]');
+            const sidebarClose = document.querySelector('[data-sidebar-close]');
             const languageSelect = document.querySelector('[data-language-select]');
+            const mobileSidebarQuery = window.matchMedia('(max-width: 991.98px)');
 
             if (languageSelect) {
                 const savedLanguage = localStorage.getItem('tailor_language') || 'en';
@@ -1040,9 +1290,52 @@
             }
 
             if (shell && sidebarToggle) {
+                const setMobileSidebar = (isOpen) => {
+                    shell.classList.toggle('mobile-sidebar-open', isOpen);
+                    document.body.classList.toggle('mobile-sidebar-lock', isOpen);
+                    sidebarToggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+                };
+
+                if (mobileSidebarQuery.matches) {
+                    shell.classList.remove('sidebar-collapsed');
+                    setMobileSidebar(false);
+                }
+
                 sidebarToggle.addEventListener('click', () => {
+                    if (mobileSidebarQuery.matches) {
+                        shell.classList.remove('sidebar-collapsed');
+                        setMobileSidebar(!shell.classList.contains('mobile-sidebar-open'));
+                        return;
+                    }
+
                     const isCollapsed = shell.classList.toggle('sidebar-collapsed');
                     sidebarToggle.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+                });
+
+                sidebarClose?.addEventListener('click', () => setMobileSidebar(false));
+
+                shell.querySelectorAll('.sidebar-link').forEach((link) => {
+                    link.addEventListener('click', () => {
+                        if (mobileSidebarQuery.matches) {
+                            setMobileSidebar(false);
+                        }
+                    });
+                });
+
+                document.addEventListener('keydown', (event) => {
+                    if (event.key === 'Escape') {
+                        setMobileSidebar(false);
+                    }
+                });
+
+                mobileSidebarQuery.addEventListener('change', (event) => {
+                    if (event.matches) {
+                        shell.classList.remove('sidebar-collapsed');
+                        setMobileSidebar(false);
+                    } else {
+                        setMobileSidebar(false);
+                        sidebarToggle.setAttribute('aria-expanded', shell.classList.contains('sidebar-collapsed') ? 'false' : 'true');
+                    }
                 });
             }
         })();

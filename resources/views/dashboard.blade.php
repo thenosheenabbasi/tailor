@@ -451,30 +451,212 @@
 
         @media (max-width: 767.98px) {
             .dashboard-top,
-            .summary-grid,
             .dashboard-middle,
             .status-layout {
                 grid-template-columns: 1fr;
             }
 
+            .dashboard-view {
+                gap: 0.75rem;
+            }
+
+            .dashboard-top,
+            .dashboard-middle {
+                gap: 0.75rem;
+            }
+
             .welcome-card,
             .panel-card,
             .recent-card {
-                padding: 1rem;
+                padding: 0.88rem;
+                border-radius: 14px;
+            }
+
+            .welcome-card {
+                min-height: 0;
+            }
+
+            .welcome-title {
+                max-width: none;
+                font-size: 1.18rem;
+            }
+
+            .welcome-copy {
+                max-width: none;
+                font-size: 0.84rem;
+            }
+
+            .summary-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+                gap: 0.65rem;
             }
 
             .summary-card {
                 min-height: auto;
+                display: block;
+                padding: 0.78rem;
+            }
+
+            .summary-icon {
+                width: 36px;
+                height: 36px;
+                margin-bottom: 0.5rem;
+            }
+
+            .summary-label,
+            .summary-meta {
+                font-size: 0.8rem;
+            }
+
+            .summary-value {
+                margin-top: 0.22rem;
+                font-size: 1.15rem;
+                line-height: 1.18;
             }
 
             .panel-head,
             .recent-head {
                 flex-direction: column;
                 align-items: flex-start;
+                gap: 0.48rem;
             }
 
-            .recent-table {
-                min-width: 820px;
+            .panel-filter {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .analytics-chart {
+                height: 180px;
+            }
+
+            .status-chart-shell {
+                width: min(100%, 132px);
+            }
+
+            .status-layout {
+                gap: 0.75rem;
+            }
+
+            .status-row {
+                padding: 0.58rem 0;
+            }
+
+            .recent-link {
+                width: 100%;
+                display: inline-flex;
+                min-height: 38px;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid rgba(215, 154, 30, 0.24);
+                border-radius: 10px;
+                background: #fffaf0;
+            }
+
+            .table-responsive {
+                overflow: visible;
+            }
+
+            .recent-table,
+            .recent-table thead,
+            .recent-table tbody,
+            .recent-table tr,
+            .recent-table td {
+                display: block;
+                width: 100%;
+            }
+
+            .recent-table thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            .recent-table tbody {
+                display: grid;
+                gap: 0.62rem;
+            }
+
+            .recent-table tbody tr {
+                padding: 0.72rem;
+                border: 1px solid rgba(17, 17, 17, 0.07);
+                border-radius: 12px;
+                background: #fffdf8;
+            }
+
+            .recent-table tbody td {
+                display: grid;
+                grid-template-columns: minmax(84px, 0.44fr) minmax(0, 1fr);
+                align-items: center;
+                gap: 0.65rem;
+                padding: 0.38rem 0;
+                border-bottom: 0;
+                font-size: 0.82rem;
+                word-break: break-word;
+            }
+
+            .recent-table tbody td::before {
+                color: #736c62;
+                font-size: 0.72rem;
+                font-weight: 700;
+            }
+
+            .recent-table tbody td:nth-child(1)::before {
+                content: "Invoice";
+            }
+
+            .recent-table tbody td:nth-child(2)::before {
+                content: "Client";
+            }
+
+            .recent-table tbody td:nth-child(3)::before {
+                content: "Status";
+            }
+
+            .recent-table tbody td:nth-child(4)::before {
+                content: "Date";
+            }
+
+            .recent-table tbody td:nth-child(5)::before {
+                content: "Amount";
+            }
+
+            .recent-table tbody td:nth-child(6) {
+                display: none;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .dashboard-view {
+                gap: 0.62rem;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .recent-table tbody td {
+                grid-template-columns: 74px minmax(0, 1fr);
+            }
+        }
+
+        @media (max-width: 360px) {
+            .welcome-card,
+            .panel-card,
+            .recent-card,
+            .summary-card {
+                padding: 0.72rem;
+            }
+
+            .recent-table tbody td {
+                grid-template-columns: 1fr;
+                gap: 0.18rem;
             }
         }
     </style>

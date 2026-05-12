@@ -415,9 +415,131 @@
         }
 
         @media (max-width: 575.98px) {
+            .access-page {
+                gap: 0.72rem;
+            }
+
+            .credentials-panel,
+            .access-shell {
+                padding: 0.82rem;
+                border-radius: 0.85rem;
+            }
+
             .access-top-action .btn {
                 width: 100%;
                 min-width: 0;
+            }
+
+            .access-toolbar {
+                gap: 0.62rem;
+                margin-bottom: 0.72rem;
+            }
+
+            .access-toolbar-title {
+                font-size: 0.86rem;
+            }
+
+            .access-toolbar .text-secondary {
+                font-size: 0.76rem;
+                line-height: 1.45;
+            }
+
+            .access-table-wrap {
+                overflow: visible;
+                padding-bottom: 0;
+            }
+
+            .access-table,
+            .access-table thead,
+            .access-table tbody,
+            .access-table tr,
+            .access-table td {
+                display: block;
+                width: 100%;
+                min-width: 0;
+            }
+
+            .access-table thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            .access-table tbody {
+                display: grid;
+                gap: 0.62rem;
+            }
+
+            .access-table tbody tr {
+                padding: 0.72rem;
+                border: 1px solid rgba(17, 17, 17, 0.08);
+                border-radius: 0.78rem;
+                background: #ffffff;
+                box-shadow: 0 8px 18px rgba(17, 17, 17, 0.045);
+            }
+
+            .access-table tbody td,
+            .access-table tbody tr:nth-child(even) td,
+            .access-table tbody tr:hover td {
+                display: grid;
+                grid-template-columns: minmax(74px, 0.38fr) minmax(0, 1fr);
+                align-items: center;
+                gap: 0.55rem;
+                padding: 0.34rem 0;
+                border-bottom: 0;
+                background: transparent !important;
+                font-size: 0.8rem;
+                line-height: 1.35;
+                word-break: break-word;
+            }
+
+            .access-table tbody td::before {
+                color: rgba(17, 17, 17, 0.52);
+                font-size: 0.66rem;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            .access-table tbody td:nth-child(1)::before { content: "Name"; }
+            .access-table tbody td:nth-child(2)::before { content: "Email"; }
+            .access-table tbody td:nth-child(3)::before { content: "Role"; }
+            .access-table tbody td:nth-child(4)::before { content: "Created"; }
+            .access-table tbody td:nth-child(5)::before { content: "Manage"; }
+
+            .access-table tbody td.text-center {
+                display: block;
+                padding: 1rem 0.25rem;
+            }
+
+            .access-table tbody td.text-center::before {
+                content: none;
+            }
+
+            .access-edit-btn {
+                width: 40px;
+                height: 40px;
+                border-radius: 0.72rem !important;
+            }
+
+            .access-modal-dialog {
+                width: min(100%, calc(100vw - 1rem));
+                border-radius: 1rem;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .access-table tbody td,
+            .access-table tbody tr:nth-child(even) td,
+            .access-table tbody tr:hover td {
+                grid-template-columns: 1fr;
+                gap: 0.15rem;
             }
         }
     </style>

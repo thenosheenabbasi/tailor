@@ -464,6 +464,26 @@
             border-spacing: 0;
         }
 
+        .table-card .table.report-table {
+            width: 100%;
+            min-width: 0;
+            table-layout: fixed;
+        }
+
+        .table-card .table.report-table th,
+        .table-card .table.report-table td,
+        .table-card .table.report-table .tailor-cell,
+        .table-card .table.report-table .date-cell,
+        .table-card .table.report-table .details-cell {
+            min-width: 0;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+
+        .report-results-card .table-responsive {
+            overflow-x: hidden;
+        }
+
         .table-card .table thead th {
             color: #a79e8f;
             font-size: 0.72rem;
@@ -1355,6 +1375,290 @@
             color: #111111;
             border-color: rgba(17, 17, 17, 0.2);
         }
+
+        @media (max-width: 767.98px) {
+            .orders-view,
+            .orders-content,
+            .report-summary-section {
+                gap: 0.72rem;
+            }
+
+            .orders-top-action,
+            .table-toolbar {
+                justify-content: stretch;
+                margin-bottom: 0;
+            }
+
+            .orders-top-action .btn,
+            .create-tailor-btn,
+            .hero-action .btn-tailor,
+            .table-toolbar .btn {
+                width: 100%;
+                min-width: 0;
+            }
+
+            .hero-panel,
+            .table-card,
+            .report-toolbar,
+            .category-summary-panel {
+                padding: 0.82rem;
+                border-radius: 0.85rem;
+            }
+
+            .hero-kicker {
+                margin-bottom: 0.28rem;
+                font-size: 0.62rem;
+                letter-spacing: 0.12em;
+            }
+
+            .hero-title {
+                font-size: 1.14rem;
+                line-height: 1.18;
+            }
+
+            .hero-copy {
+                margin-bottom: 0;
+                font-size: 0.78rem;
+                line-height: 1.45;
+            }
+
+            .stat-card {
+                min-height: 0;
+                padding: 0.86rem;
+                border-radius: 0.85rem;
+            }
+
+            .category-summary-grid {
+                grid-template-columns: 1fr;
+                gap: 0.55rem;
+            }
+
+            .category-summary-card {
+                min-height: 0;
+                padding: 0.78rem;
+                border-radius: 0.8rem;
+            }
+
+            .report-toolbar-head {
+                margin-bottom: 0.72rem;
+                padding-bottom: 0.68rem;
+            }
+
+            .report-filter-actions {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+
+            .report-filter-actions .btn,
+            .report-download-icon {
+                width: 100%;
+            }
+
+            .invoice-search {
+                margin-bottom: 0.72rem !important;
+            }
+
+            .invoice-search .search-shell {
+                max-width: none;
+            }
+
+            .invoice-search .form-control {
+                min-height: 2.7rem;
+            }
+
+            .table-card .table-responsive {
+                overflow: visible;
+                padding-bottom: 0;
+            }
+
+            .table-card .table,
+            .table-card .table thead,
+            .table-card .table tbody,
+            .table-card .table tr,
+            .table-card .table td {
+                display: block;
+                width: 100%;
+                min-width: 0;
+            }
+
+            .table-card .table {
+                border-spacing: 0;
+            }
+
+            .table-card .table thead {
+                position: absolute;
+                width: 1px;
+                height: 1px;
+                padding: 0;
+                margin: -1px;
+                overflow: hidden;
+                clip: rect(0, 0, 0, 0);
+                white-space: nowrap;
+                border: 0;
+            }
+
+            .table-card .table tbody {
+                display: grid;
+                gap: 0.62rem;
+            }
+
+            .table-card .table tbody tr {
+                padding: 0.72rem;
+                border: 1px solid rgba(17, 17, 17, 0.08);
+                border-radius: 0.78rem;
+                background: #ffffff;
+                box-shadow: 0 8px 18px rgba(17, 17, 17, 0.045);
+            }
+
+            .table-card .table tbody td,
+            .table-card .table tbody tr:nth-child(even) td,
+            .table-card .table tbody tr:hover td {
+                display: grid;
+                grid-template-columns: minmax(82px, 0.42fr) minmax(0, 1fr);
+                align-items: center;
+                gap: 0.56rem;
+                padding: 0.36rem 0;
+                border-bottom: 0;
+                background: transparent !important;
+                font-size: 0.8rem;
+                line-height: 1.35;
+                word-break: break-word;
+            }
+
+            .table-card .table tbody td::before {
+                color: rgba(17, 17, 17, 0.52);
+                font-size: 0.66rem;
+                font-weight: 800;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }
+
+            .table-card .table tbody td:nth-child(1)::before { content: "Invoice"; }
+            .table-card .table tbody td:nth-child(2)::before { content: "Fatora"; }
+            .table-card .table tbody td:nth-child(3)::before { content: "Tailor"; }
+            .table-card .table tbody td:nth-child(4)::before { content: "Date"; }
+            .table-card .table tbody td:nth-child(5)::before { content: "Category"; }
+            .table-card .table tbody td:nth-child(6)::before { content: "Qty"; }
+            .table-card .table tbody td:nth-child(7)::before { content: "Note"; }
+            .table-card .table tbody td:nth-child(8)::before { content: "Status"; }
+            .table-card .table tbody td:nth-child(9)::before { content: "Amount"; }
+            .table-card .table tbody td:nth-child(10)::before { content: "View"; }
+            .table-card .table tbody td:nth-child(11)::before { content: "Tools"; }
+
+            .table-card .table.report-table tbody td:nth-child(1)::before { content: "Fatora"; }
+            .table-card .table.report-table tbody td:nth-child(2)::before { content: "Tailor"; }
+            .table-card .table.report-table tbody td:nth-child(3)::before { content: "Date"; }
+            .table-card .table.report-table tbody td:nth-child(4)::before { content: "Status"; }
+            .table-card .table.report-table tbody td:nth-child(5)::before { content: "View"; }
+
+            .table-card .table tbody td.text-center {
+                display: block;
+                padding: 1rem 0.25rem;
+                text-align: center !important;
+            }
+
+            .table-card .table tbody td.text-center::before,
+            .table-summary-row td::before {
+                content: none !important;
+            }
+
+            .tailor-cell,
+            .date-cell,
+            .note-cell,
+            .details-cell,
+            .actions-cell {
+                min-width: 0;
+            }
+
+            .note-cell {
+                max-width: none;
+            }
+
+            .status-pill {
+                min-width: 0;
+                width: fit-content;
+                max-width: 100%;
+            }
+
+            .details-btn {
+                width: fit-content;
+            }
+
+            .actions-cell .actions-wrap {
+                display: grid;
+                grid-template-columns: repeat(3, minmax(0, 1fr));
+                gap: 0.5rem;
+            }
+
+            .actions-cell .action-btn,
+            .actions-cell form {
+                width: 100%;
+            }
+
+            .actions-cell .action-btn {
+                height: 40px;
+                border-radius: 0.75rem;
+            }
+
+            .table-summary-row {
+                border-color: rgba(215, 154, 30, 0.22) !important;
+                background: #fffaf0 !important;
+            }
+
+            .table-summary-row td {
+                display: block !important;
+                padding: 0.42rem 0 !important;
+                background: transparent !important;
+            }
+
+            .details-modal {
+                align-items: flex-end;
+                padding: 0;
+            }
+
+            .details-modal-dialog {
+                width: 100%;
+                max-height: 92dvh;
+                border-radius: 1rem 1rem 0 0;
+            }
+
+            .details-modal-title {
+                padding-right: 2.5rem;
+                font-size: 1rem;
+                text-align: left;
+            }
+
+            .details-hero-side {
+                display: none;
+            }
+
+            .details-section-title {
+                padding: 0.72rem 0.82rem;
+                font-size: 0.68rem;
+                letter-spacing: 0.12em;
+            }
+
+            .details-section-body {
+                padding: 0.72rem;
+            }
+
+            .details-info-grid > div {
+                padding: 0.25rem 0;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .table-card .table tbody td,
+            .table-card .table tbody tr:nth-child(even) td,
+            .table-card .table tbody tr:hover td {
+                grid-template-columns: 1fr;
+                gap: 0.16rem;
+            }
+
+            .actions-cell .actions-wrap {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
     </style>
 
     <div class="orders-view">
@@ -1512,18 +1816,26 @@
                     <table class="table align-middle {{ $pageMode === 'report' ? 'report-table' : 'invoice-table' }}">
                         <thead>
                             <tr>
-                                <th>Invoice #</th>
-                                <th>Fatora #</th>
-                                <th>Tailor Name</th>
-                                <th>Date</th>
-                                <th>Category</th>
-                                <th>Qty</th>
-                                <th class="note-col">Note</th>
-                                <th>Status</th>
-                                <th>Total Amount</th>
-                                <th>View</th>
-                                @if ($canManageSettings && $pageMode !== 'report')
-                                    <th>Actions</th>
+                                @if ($pageMode === 'report')
+                                    <th>Fatora #</th>
+                                    <th>Tailor Name</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>View</th>
+                                @else
+                                    <th>Invoice #</th>
+                                    <th>Fatora #</th>
+                                    <th>Tailor Name</th>
+                                    <th>Date</th>
+                                    <th>Category</th>
+                                    <th>Qty</th>
+                                    <th class="note-col">Note</th>
+                                    <th>Status</th>
+                                    <th>Total Amount</th>
+                                    <th>View</th>
+                                    @if ($canManageSettings)
+                                        <th>Actions</th>
+                                    @endif
                                 @endif
                             </tr>
                         </thead>
@@ -1550,85 +1862,90 @@
                                     ];
                                 @endphp
                                 <tr>
-                                    <td>{{ $order->invoice_number }}</td>
-                                    <td>{{ $order->fatora_number ?: 'N/A' }}</td>
-                                    <td class="tailor-cell">{{ $displayTailorName }}</td>
-                                    <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
-                                    <td>{{ $order->category_label }}</td>
-                                    <td>{{ $order->quantity }}</td>
-                                    <td class="note-cell" title="{{ $order->note ?: 'No note added' }}">{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 40) }}</td>
-                                    <td>
-                                        <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
-                                            {{ $order->status_label }}
-                                        </span>
-                                        @if ($order->completed_at)
-                                            <div class="small subdued mt-2">{{ $order->completed_at->format('d M Y h:i A') }}</div>
-                                        @endif
-                                    </td>
-                                    <td class="amount-cell">{{ number_format($order->total_price, 2) }} QAR</td>
-                                    <td class="details-cell">
-                                        <button
-                                            type="button"
-                                            class="btn btn-outline-dark details-btn view-details-btn"
-                                            data-order="{{ json_encode($detailPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }}">
-                                            View Details
-                                        </button>
-                                    </td>
-                                    @if ($canManageSettings && $pageMode !== 'report')
-                                        <td class="actions-cell">
-                                            <div class="actions-wrap">
-                                                <a href="{{ route('admin.orders.edit', $order) }}" class="btn action-btn edit-btn" title="Edit Invoice" aria-label="Edit Invoice">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                                                        <path d="M12 20h9"/>
-                                                        <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"/>
-                                                    </svg>
-                                                </a>
-                                                <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" class="delete-order-form" data-invoice-number="{{ $order->invoice_number }}">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn action-btn hide-btn" title="Delete Invoice" aria-label="Delete Invoice">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                                                            <path d="M3 6h18"/>
-                                                            <path d="M8 6V4h8v2"/>
-                                                            <path d="M19 6l-1 14H6L5 6"/>
-                                                            <path d="M10 11v6"/>
-                                                            <path d="M14 11v6"/>
-                                                        </svg>
-                                                    </button>
-                                                </form>
-                                                <a href="{{ route('admin.orders.receipt', $order) }}" class="btn action-btn print-btn" target="_blank" rel="noopener" aria-label="Print Receipt" title="Print Receipt">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
-                                                        <path d="M6 9V4h12v5"/>
-                                                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
-                                                        <path d="M6 14h12v6H6z"/>
-                                                    </svg>
-                                                </a>
-                                            </div>
+                                    @if ($pageMode === 'report')
+                                        <td>{{ $order->fatora_number ?: 'N/A' }}</td>
+                                        <td class="tailor-cell">{{ $displayTailorName }}</td>
+                                        <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
+                                        <td>
+                                            <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
+                                                {{ $order->status_label }}
+                                            </span>
+                                            @if ($order->completed_at)
+                                                <div class="small subdued mt-2">{{ $order->completed_at->format('d M Y h:i A') }}</div>
+                                            @endif
                                         </td>
+                                        <td class="details-cell">
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-dark details-btn view-details-btn"
+                                                data-order="{{ json_encode($detailPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }}">
+                                                View Details
+                                            </button>
+                                        </td>
+                                    @else
+                                        <td>{{ $order->invoice_number }}</td>
+                                        <td>{{ $order->fatora_number ?: 'N/A' }}</td>
+                                        <td class="tailor-cell">{{ $displayTailorName }}</td>
+                                        <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
+                                        <td>{{ $order->category_label }}</td>
+                                        <td>{{ $order->quantity }}</td>
+                                        <td class="note-cell" title="{{ $order->note ?: 'No note added' }}">{{ \Illuminate\Support\Str::limit($order->note ?: 'No note added', 40) }}</td>
+                                        <td>
+                                            <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
+                                                {{ $order->status_label }}
+                                            </span>
+                                            @if ($order->completed_at)
+                                                <div class="small subdued mt-2">{{ $order->completed_at->format('d M Y h:i A') }}</div>
+                                            @endif
+                                        </td>
+                                        <td class="amount-cell">{{ number_format($order->total_price, 2) }} QAR</td>
+                                        <td class="details-cell">
+                                            <button
+                                                type="button"
+                                                class="btn btn-outline-dark details-btn view-details-btn"
+                                                data-order="{{ json_encode($detailPayload, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) }}">
+                                                View Details
+                                            </button>
+                                        </td>
+                                        @if ($canManageSettings)
+                                            <td class="actions-cell">
+                                                <div class="actions-wrap">
+                                                    <a href="{{ route('admin.orders.edit', $order) }}" class="btn action-btn edit-btn" title="Edit Invoice" aria-label="Edit Invoice">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                            <path d="M12 20h9"/>
+                                                            <path d="M16.5 3.5a2.12 2.12 0 1 1 3 3L7 19l-4 1 1-4Z"/>
+                                                        </svg>
+                                                    </a>
+                                                    <form action="{{ route('admin.orders.destroy', $order) }}" method="POST" class="delete-order-form" data-invoice-number="{{ $order->invoice_number }}">
+                                                        @csrf
+                                                        @method('DELETE')
+                                                        <button type="submit" class="btn action-btn hide-btn" title="Delete Invoice" aria-label="Delete Invoice">
+                                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                                <path d="M3 6h18"/>
+                                                                <path d="M8 6V4h8v2"/>
+                                                                <path d="M19 6l-1 14H6L5 6"/>
+                                                                <path d="M10 11v6"/>
+                                                                <path d="M14 11v6"/>
+                                                            </svg>
+                                                        </button>
+                                                    </form>
+                                                    <a href="{{ route('admin.orders.receipt', $order) }}" class="btn action-btn print-btn" target="_blank" rel="noopener" aria-label="Print Receipt" title="Print Receipt">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" aria-hidden="true">
+                                                            <path d="M6 9V4h12v5"/>
+                                                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/>
+                                                            <path d="M6 14h12v6H6z"/>
+                                                        </svg>
+                                                    </a>
+                                                </div>
+                                            </td>
+                                        @endif
                                     @endif
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $canManageSettings && $pageMode !== 'report' ? 11 : 10 }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
+                                    <td colspan="{{ $pageMode === 'report' ? 5 : ($canManageSettings ? 11 : 10) }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
                                 </tr>
                             @endforelse
-                            @if ($pageMode === 'report' && $orders->count())
-                                <tr class="table-summary-row">
-                                    <td colspan="6">
-                                        <span class="summary-label">Report Summary</span>
-                                        <span class="table-summary-meta">Filtered totals for the current report view.</span>
-                                    </td>
-                                    <td colspan="2">
-                                        <span class="summary-label">Records</span>
-                                        <span class="table-summary-value">{{ $visibleOrderCount }}</span>
-                                    </td>
-                                    <td class="amount-cell">
-                                        <span class="summary-label">Amount</span>
-                                        <span class="table-summary-value">{{ number_format($visibleOrderAmount, 2) }} QAR</span>
-                                    </td>
-                                    <td>&nbsp;</td>
-                                </tr>
-                            @endif
                         </tbody>
                     </table>
                 </div>

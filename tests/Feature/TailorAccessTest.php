@@ -648,7 +648,10 @@ class TailorAccessTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.orders.index', ['view' => 'report']))
             ->assertOk()
+            ->assertSeeInOrder(['Fatora #', 'Tailor Name', 'Date', 'Status', 'View'])
             ->assertSee('View Details')
+            ->assertDontSee('<th>Invoice #</th>', false)
+            ->assertDontSee('<th>Total Amount</th>', false)
             ->assertSee('Status Update')
             ->assertSee('Update Status');
     }
