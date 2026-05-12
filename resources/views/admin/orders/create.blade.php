@@ -119,7 +119,7 @@
             background: #ffffff;
             border: 1px solid rgba(17, 17, 17, 0.08);
             box-shadow: 0 10px 24px rgba(17, 17, 17, 0.08);
-            overflow: hidden;
+            overflow: visible;
         }
 
         .entry-card {
@@ -285,11 +285,13 @@
         }
 
         .entry-date-popover {
-            position: absolute;
-            top: calc(100% + 0.45rem);
+            position: fixed;
+            top: 0;
             left: 0;
-            z-index: 40;
+            z-index: 1200;
             width: min(92vw, 21rem);
+            max-height: calc(100vh - 1rem);
+            overflow-y: auto;
             padding: 0.8rem;
             border: 1px solid rgba(17, 17, 17, 0.14);
             border-radius: 0.85rem;
@@ -638,19 +640,19 @@
             const daysWrap = document.querySelector('[data-days]');
             const hijriMonthSelect = document.querySelector('[data-hijri-month]');
             const hijriYearSelect = document.querySelector('[data-hijri-year]');
-            const hijriMonthFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura-nu-latn', {
-                month: 'long',
-                year: 'numeric',
-            });
+            const workspaceMain = document.querySelector('.workspace-main');
+            const workspaceContent = document.querySelector('.workspace-content');
+            const originalBodyPaddingBottom = document.body.style.paddingBottom;
+            const originalWorkspaceContentPaddingBottom = workspaceContent ? workspaceContent.style.paddingBottom : '';
+            const baseWorkspaceContentPaddingBottom = workspaceContent
+                ? (Number.parseFloat(window.getComputedStyle(workspaceContent).paddingBottom) || 0)
+                : 0;
             const hijriPartsFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura-nu-latn', {
                 day: 'numeric',
                 month: 'numeric',
                 year: 'numeric',
             });
-            const hijriDisplayFormatter = new Intl.DateTimeFormat('en-US-u-ca-islamic-umalqura-nu-latn', {
-                day: '2-digit',
-                month: 'long',
-                year: 'numeric',
+            const timeFormatter = new Intl.DateTimeFormat('en-US', {
                 hour: '2-digit',
                 minute: '2-digit',
                 hour12: true,
@@ -682,7 +684,14 @@
 
             const pad = (value) => String(value).padStart(2, '0');
 
-            const formatDisplayDate = (date) => hijriDisplayFormatter.format(date);
+            const getHijriMonthLabel = (month) => hijriMonths.find((item) => item.value === month)?.label || '';
+
+            const formatDisplayDate = (date) => {
+                const hijri = getHijriParts(date);
+                const monthName = getHijriMonthLabel(hijri.month);
+
+                return `${monthName} ${hijri.day}, ${hijri.year} AH at ${timeFormatter.format(date)}`;
+            };
 
             const formatSubmitDate = (date) => {
                 return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
@@ -826,7 +835,7 @@
 
                 const firstGridDate = new Date(firstOfMonth);
                 firstGridDate.setDate(firstOfMonth.getDate() - firstOfMonth.getDay());
-                monthLabel.textContent = hijriMonthFormatter.format(firstOfMonth);
+                monthLabel.textContent = `${getHijriMonthLabel(visibleHijriMonth)} ${visibleHijriYear} AH`;
                 syncDateSelectors();
 
                 weekdaysWrap.innerHTML = '';
@@ -872,6 +881,7 @@
                 datePopover.hidden = false;
                 dateToggle.setAttribute('aria-expanded', 'true');
                 renderCalendar();
+                keepCalendarVisibleBelow();
             };
 
             const closeCalendar = () => {
@@ -881,6 +891,61 @@
 
                 datePopover.hidden = true;
                 dateToggle.setAttribute('aria-expanded', 'false');
+                document.body.style.paddingBottom = originalBodyPaddingBottom;
+                if (workspaceContent) {
+                    workspaceContent.style.paddingBottom = originalWorkspaceContentPaddingBottom;
+                }
+            };
+
+            const positionCalendar = () => {
+                if (!datePopover || datePopover.hidden || !datePicker) {
+                    return;
+                }
+
+                const gap = 8;
+                const controlRect = datePicker.getBoundingClientRect();
+                const popoverWidth = Math.min(datePopover.offsetWidth || 336, window.innerWidth - (gap * 2));
+
+                datePopover.style.width = `${popoverWidth}px`;
+                datePopover.style.left = `${Math.min(
+                    Math.max(controlRect.left, gap),
+                    window.innerWidth - popoverWidth - gap,
+                )}px`;
+                datePopover.style.maxHeight = `${Math.max(260, window.innerHeight - (gap * 2))}px`;
+                datePopover.style.top = `${controlRect.bottom + gap}px`;
+            };
+
+            const keepCalendarVisibleBelow = () => {
+                positionCalendar();
+
+                if (!datePopover || datePopover.hidden) {
+                    return;
+                }
+
+                const gap = 8;
+                const footerSpace = 78;
+                const popoverRect = datePopover.getBoundingClientRect();
+                const overflowBottom = popoverRect.bottom - (window.innerHeight - gap - footerSpace);
+
+                if (overflowBottom <= 0) {
+                    return;
+                }
+
+                const useWorkspaceScroll = workspaceMain && window.getComputedStyle(document.body).overflow === 'hidden';
+                const scrollTarget = useWorkspaceScroll ? workspaceMain : window;
+
+                if (useWorkspaceScroll && workspaceContent) {
+                    workspaceContent.style.paddingBottom = `${Math.ceil(baseWorkspaceContentPaddingBottom + overflowBottom + footerSpace + 24)}px`;
+                } else {
+                    document.body.style.paddingBottom = `${Math.ceil(overflowBottom + footerSpace + 24)}px`;
+                }
+
+                scrollTarget.scrollBy({
+                    top: overflowBottom + 16,
+                    behavior: 'auto',
+                });
+
+                requestAnimationFrame(positionCalendar);
             };
 
             stepButtons.forEach((button) => {
@@ -922,6 +987,7 @@
                 visibleHijriMonth = previousMonth.month;
 
                 renderCalendar();
+                keepCalendarVisibleBelow();
             });
 
             document.querySelector('[data-month-next]')?.addEventListener('click', () => {
@@ -930,11 +996,13 @@
                 visibleHijriMonth = nextMonth.month;
 
                 renderCalendar();
+                keepCalendarVisibleBelow();
             });
 
             hijriMonthSelect?.addEventListener('change', () => {
                 visibleHijriMonth = Number(hijriMonthSelect.value);
                 renderCalendar();
+                keepCalendarVisibleBelow();
             });
 
             hijriYearSelect?.addEventListener('change', () => {
@@ -945,6 +1013,7 @@
                 }
 
                 renderCalendar();
+                keepCalendarVisibleBelow();
             });
 
             daysWrap?.addEventListener('click', (event) => {
@@ -994,6 +1063,9 @@
                     closeCalendar();
                 }
             });
+
+            window.addEventListener('resize', keepCalendarVisibleBelow);
+            window.addEventListener('scroll', positionCalendar, true);
 
             updateTotal();
             setSelectedDate(selectedDate);

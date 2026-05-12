@@ -744,6 +744,35 @@
                 align-items: flex-start;
             }
         }
+
+        @media (min-width: 992px) {
+            html,
+            body {
+                height: 100%;
+            }
+
+            body {
+                overflow: hidden;
+            }
+
+            .dashboard-shell,
+            .app-body {
+                height: 100vh;
+                min-height: 0;
+            }
+
+            .sidebar-panel {
+                max-height: 100vh;
+                overflow: hidden;
+            }
+
+            .workspace-main {
+                height: 100vh;
+                min-height: 0;
+                overflow-y: auto;
+                overscroll-behavior: contain;
+            }
+        }
     </style>
 </head>
 <body>
