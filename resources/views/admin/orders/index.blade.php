@@ -3,6 +3,7 @@
 @section('content')
     @php
         $visibleOrderCount = $orders->count();
+        $visibleOrderQuantity = $orders->sum('quantity');
         $visibleOrderAmount = $orders->sum('total_price');
     @endphp
 
@@ -1548,8 +1549,9 @@
             .table-card .table.report-table tbody td:nth-child(1)::before { content: "Fatora"; }
             .table-card .table.report-table tbody td:nth-child(2)::before { content: "Tailor"; }
             .table-card .table.report-table tbody td:nth-child(3)::before { content: "Date"; }
-            .table-card .table.report-table tbody td:nth-child(4)::before { content: "Status"; }
-            .table-card .table.report-table tbody td:nth-child(5)::before { content: "View"; }
+            .table-card .table.report-table tbody td:nth-child(4)::before { content: "Qty"; }
+            .table-card .table.report-table tbody td:nth-child(5)::before { content: "Status"; }
+            .table-card .table.report-table tbody td:nth-child(6)::before { content: "View"; }
 
             .table-card .table tbody td.text-center {
                 display: block;
@@ -1756,35 +1758,6 @@
                             </form>
                         </div>
 
-                        @if ($hasActiveReportFilters && $filters['thobe_category'] === '')
-                            <div class="report-summary-section">
-                                <div class="category-summary-panel">
-                                    <div class="category-summary-body" id="category-summary-body">
-                                        <div class="mb-3">
-                                            <h3 class="category-summary-title mb-1">
-                                                All Categories Summary
-                                            </h3>
-                                            <p class="category-summary-copy mb-0">
-                                                Quantity and amount are calculated based on the current report filters.
-                                            </p>
-                                        </div>
-                                        <div class="category-summary-grid">
-                                            @foreach ($reportCategorySummaries as $summary)
-                                                <div class="category-summary-card" data-category-summary="{{ $summary['key'] }}">
-                                                    <div class="category-summary-label">{{ $summary['label'] }}</div>
-                                                    <div class="category-summary-price">Single Price: {{ number_format($summary['unit_price'], 2) }} QAR</div>
-                                                    <div class="category-summary-qty" data-category-quantity="{{ $summary['quantity'] }}">{{ $summary['quantity'] }}</div>
-                                                    <div class="category-summary-footer">
-                                                        <div class="category-summary-meta">Total Thobes</div>
-                                                        <div class="category-summary-amount" data-category-amount="{{ number_format($summary['amount'], 2, '.', '') }}">{{ number_format($summary['amount'], 2) }} QAR</div>
-                                                    </div>
-                                                </div>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endif
                     </div>
                 
 
@@ -1820,6 +1793,7 @@
                                     <th>Fatora #</th>
                                     <th>Tailor Name</th>
                                     <th>Date</th>
+                                    <th>Qty</th>
                                     <th>Status</th>
                                     <th>View</th>
                                 @else
@@ -1866,6 +1840,7 @@
                                         <td>{{ $order->fatora_number ?: 'N/A' }}</td>
                                         <td class="tailor-cell">{{ $displayTailorName }}</td>
                                         <td class="date-cell">{{ $order->order_date->format('d M Y h:i A') }}</td>
+                                        <td>{{ $order->quantity }}</td>
                                         <td>
                                             <span class="status-pill {{ $order->status === \App\Models\TailorOrder::STATUS_COMPLETED ? 'completed' : ($order->status === \App\Models\TailorOrder::STATUS_IN_PROGRESS ? 'in-progress' : 'pending') }}">
                                                 {{ $order->status_label }}
@@ -1943,9 +1918,29 @@
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="{{ $pageMode === 'report' ? 5 : ($canManageSettings ? 11 : 10) }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
+                                    <td colspan="{{ $pageMode === 'report' ? 6 : ($canManageSettings ? 11 : 10) }}" class="text-center py-5 subdued">No invoices have been added yet.</td>
                                 </tr>
                             @endforelse
+                            @if ($pageMode === 'report' && $orders->count())
+                                <tr class="table-summary-row" data-report-summary>
+                                    <td colspan="3">
+                                        <span class="summary-label">Report Summary</span>
+                                        <span class="table-summary-meta">Filtered totals for the current report view.</span>
+                                    </td>
+                                    <td>
+                                        <span class="summary-label">Total Qty</span>
+                                        <span class="table-summary-value" data-report-total-quantity="{{ $visibleOrderQuantity }}">{{ $visibleOrderQuantity }}</span>
+                                    </td>
+                                    <td class="amount-cell">
+                                        <span class="summary-label">Total Amount</span>
+                                        <span class="table-summary-value" data-report-total-amount="{{ number_format($visibleOrderAmount, 2, '.', '') }}">{{ number_format($visibleOrderAmount, 2) }} QAR</span>
+                                    </td>
+                                    <td>
+                                        <span class="summary-label">Records</span>
+                                        <span class="table-summary-value">{{ $visibleOrderCount }}</span>
+                                    </td>
+                                </tr>
+                            @endif
                         </tbody>
                     </table>
                 </div>

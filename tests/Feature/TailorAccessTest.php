@@ -418,7 +418,7 @@ class TailorAccessTest extends TestCase
         $response->assertDontSee('INV-CAT-ADMIN-1');
     }
 
-    public function test_report_shows_category_wise_quantity_and_amount_summary_for_all_categories(): void
+    public function test_report_does_not_show_all_categories_summary_after_filtering(): void
     {
         $admin = User::factory()->create(['role' => User::ROLE_ADMIN]);
         $assignedUser = User::factory()->create(['role' => User::ROLE_USER, 'name' => 'Bilal Tailor']);
@@ -468,17 +468,13 @@ class TailorAccessTest extends TestCase
         ]));
 
         $response->assertOk();
-        $response->assertSee('All Categories Summary');
-        $response->assertSee('data-category-summary="simple"', false);
-        $response->assertSee('data-category-quantity="2"', false);
-        $response->assertSee('data-category-amount="40.00"', false);
-        $response->assertSee('data-category-summary="design"', false);
-        $response->assertSee('data-category-quantity="3"', false);
-        $response->assertSee('data-category-amount="90.00"', false);
-        $response->assertSee('data-category-summary="embroidery"', false);
-        $response->assertSee('data-category-amount="50.00"', false);
-        $response->assertSee('Total Thobes');
-        $response->assertSee('7');
+        $response->assertDontSee('All Categories Summary');
+        $response->assertDontSee('data-category-summary="simple"', false);
+        $response->assertDontSee('data-category-summary="design"', false);
+        $response->assertDontSee('data-category-summary="embroidery"', false);
+        $response->assertSee('data-report-summary', false);
+        $response->assertSee('data-report-total-quantity="7"', false);
+        $response->assertSee('data-report-total-amount="180.00"', false);
     }
 
     public function test_report_category_summary_is_hidden_without_active_filters_and_when_category_filter_is_active(): void
@@ -648,7 +644,7 @@ class TailorAccessTest extends TestCase
         $this->actingAs($admin)
             ->get(route('admin.orders.index', ['view' => 'report']))
             ->assertOk()
-            ->assertSeeInOrder(['Fatora #', 'Tailor Name', 'Date', 'Status', 'View'])
+            ->assertSeeInOrder(['Fatora #', 'Tailor Name', 'Date', 'Qty', 'Status', 'View'])
             ->assertSee('View Details')
             ->assertDontSee('<th>Invoice #</th>', false)
             ->assertDontSee('<th>Total Amount</th>', false)
