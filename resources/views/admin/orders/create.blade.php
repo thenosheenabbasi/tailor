@@ -18,7 +18,7 @@
                 'label' => $category['label'],
                 'description' => ucfirst($category['description']),
                 'price' => (float) $category['price'],
-                'formatted_price' => number_format((float) $category['price'], 0) . ' QAR',
+                'formatted_price' => number_format((float) $category['price'], 0) . ' SAR',
                 'selected' => $currentCategory === $key,
             ];
         })->values();
@@ -596,10 +596,10 @@
                                 </div>
 
                                 <div class="entry-field">
-                                    <label for="total_preview" class="form-label">Total (QAR)</label>
+                                    <label for="total_preview" class="form-label">Total (SAR)</label>
                                     <div class="entry-total-box" id="total_preview" aria-live="polite">
                                         <div class="entry-total-label">Calculated total</div>
-                                        <div class="entry-total-value"><span id="total-price">0</span> QAR</div>
+                                        <div class="entry-total-value"><span id="total-price">0</span> SAR</div>
                                     </div>
                                 </div>
                             </div>

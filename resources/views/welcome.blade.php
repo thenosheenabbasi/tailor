@@ -60,10 +60,10 @@
                         <div class="col-md-6">
                             <div class="bg-white rounded-4 p-3 h-100 shadow-sm">
                                 <h2 class="h5 mb-2">Thobe Pricing</h2>
-                                <p class="mb-1">Simple: 20 QAR</p>
-                                <p class="mb-1">Double Stitch: 25 QAR</p>
-                                <p class="mb-1">Embroidery: 25 QAR</p>
-                                <p class="mb-0">Design: 30 QAR</p>
+                                <p class="mb-1">Simple: 20 SAR</p>
+                                <p class="mb-1">Double Stitch: 25 SAR</p>
+                                <p class="mb-1">Embroidery: 25 SAR</p>
+                                <p class="mb-0">Design: 30 SAR</p>
                             </div>
                         </div>
                         <div class="col-md-6">

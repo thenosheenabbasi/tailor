@@ -96,7 +96,7 @@ class TailorOrder extends Model
     {
         return collect(self::categories())
             ->mapWithKeys(fn (array $category, string $key) => [
-                $key => "{$category['label']} ({$category['description']}) - {$category['price']} QAR",
+                $key => "{$category['label']} ({$category['description']}) - {$category['price']} SAR",
             ])
             ->all();
     }

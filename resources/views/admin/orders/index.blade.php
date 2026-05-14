@@ -485,6 +485,11 @@
             overflow-x: hidden;
         }
 
+        .table-card .table.report-table .date-cell {
+            font-size: 0.72rem;
+            line-height: 1.25;
+        }
+
         .table-card .table thead th {
             color: #a79e8f;
             font-size: 0.72rem;
@@ -1779,6 +1784,7 @@
                                     name="search"
                                     value="{{ $filters['search'] }}"
                                     class="form-control rounded-4"
+                                    autocomplete="off"
                                     placeholder="Search invoice, fatora, or tailor">
                             </div>
                         </div>
@@ -1824,8 +1830,8 @@
                                         'category' => $order->category_label,
                                         'quantity' => (string) $order->quantity,
                                         'order_date' => $order->order_date->format('d M Y h:i A'),
-                                        'unit_price' => number_format((float) $order->unit_price, 2) . ' QAR',
-                                        'total_amount' => number_format((float) $order->total_price, 2) . ' QAR',
+                                        'unit_price' => number_format((float) $order->unit_price, 2) . ' SAR',
+                                        'total_amount' => number_format((float) $order->total_price, 2) . ' SAR',
                                         'status' => $order->status_label,
                                         'status_value' => $order->status,
                                         'completed_at' => optional($order->completed_at)->format('d M Y h:i A') ?: 'Not completed yet',
@@ -1873,7 +1879,7 @@
                                                 <div class="small subdued mt-2">{{ $order->completed_at->format('d M Y h:i A') }}</div>
                                             @endif
                                         </td>
-                                        <td class="amount-cell">{{ number_format($order->total_price, 2) }} QAR</td>
+                                        <td class="amount-cell">{{ number_format($order->total_price, 2) }} SAR</td>
                                         <td class="details-cell">
                                             <button
                                                 type="button"
@@ -1933,7 +1939,7 @@
                                     </td>
                                     <td class="amount-cell">
                                         <span class="summary-label">Total Amount</span>
-                                        <span class="table-summary-value" data-report-total-amount="{{ number_format($visibleOrderAmount, 2, '.', '') }}">{{ number_format($visibleOrderAmount, 2) }} QAR</span>
+                                        <span class="table-summary-value" data-report-total-amount="{{ number_format($visibleOrderAmount, 2, '.', '') }}">{{ number_format($visibleOrderAmount, 2) }} SAR</span>
                                     </td>
                                     <td>
                                         <span class="summary-label">Records</span>
@@ -2164,11 +2170,21 @@
                 const deleteForms = document.querySelectorAll('.delete-order-form');
 
                 if (form && searchInput) {
+                    const focusKey = 'tailorInvoiceSearchFocus';
                     let timeoutId;
+
+                    if (window.sessionStorage.getItem(focusKey) === '1') {
+                        window.sessionStorage.removeItem(focusKey);
+                        searchInput.focus({ preventScroll: true });
+                        searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+                    }
 
                     searchInput.addEventListener('input', () => {
                         window.clearTimeout(timeoutId);
-                        timeoutId = window.setTimeout(() => form.submit(), 350);
+                        timeoutId = window.setTimeout(() => {
+                            window.sessionStorage.setItem(focusKey, '1');
+                            form.requestSubmit();
+                        }, 900);
                     });
                 }
 

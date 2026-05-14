@@ -456,7 +456,7 @@
                     </td>
                     <td>
                         <span class="summary-label">Total Revenue</span>
-                        <span class="summary-value">{{ number_format($reportStats['revenue'], 2) }} QAR</span>
+                        <span class="summary-value">{{ number_format($reportStats['revenue'], 2) }} SAR</span>
                     </td>
                     <td>
                         <span class="summary-label">Pending</span>
@@ -492,8 +492,8 @@
                             <tr>
                                 <td>{{ $summary['label'] }}</td>
                                 <td>{{ $summary['quantity'] }}</td>
-                                <td>{{ number_format((float) $summary['unit_price'], 2) }} QAR</td>
-                                <td class="amount">{{ number_format((float) $summary['amount'], 2) }} QAR</td>
+                                <td>{{ number_format((float) $summary['unit_price'], 2) }} SAR</td>
+                                <td class="amount">{{ number_format((float) $summary['amount'], 2) }} SAR</td>
                             </tr>
                         @empty
                             <tr>
@@ -505,7 +505,7 @@
                                 <td>Total</td>
                                 <td>{{ $summaryTotalQuantity }}</td>
                                 <td></td>
-                                <td class="amount">{{ number_format($summaryTotalAmount, 2) }} QAR</td>
+                                <td class="amount">{{ number_format($summaryTotalAmount, 2) }} SAR</td>
                             </tr>
                         @endif
                     </tbody>

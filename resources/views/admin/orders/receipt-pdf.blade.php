@@ -360,7 +360,7 @@
                     </td>
                     <td>
                         <span class="summary-label">Total Amount</span>
-                        <span class="summary-value">{{ number_format((float) $order->total_price, 2) }} QAR</span>
+                        <span class="summary-value">{{ number_format((float) $order->total_price, 2) }} SAR</span>
                     </td>
                     <td>
                         <span class="summary-label">Status</span>
@@ -420,14 +420,14 @@
                             <td>{{ $order->category_label }}</td>
                             <td>{{ $order->quantity }}</td>
                             <td>{{ $order->order_date->format('d M Y h:i A') }}</td>
-                            <td>{{ number_format((float) $order->unit_price, 2) }} QAR</td>
-                            <td><strong>{{ number_format((float) $order->total_price, 2) }} QAR</strong></td>
+                            <td>{{ number_format((float) $order->unit_price, 2) }} SAR</td>
+                            <td><strong>{{ number_format((float) $order->total_price, 2) }} SAR</strong></td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
-            <div class="total-line">Total Payable: <span>{{ number_format((float) $order->total_price, 2) }} QAR</span></div>
+            <div class="total-line">Total Payable: <span>{{ number_format((float) $order->total_price, 2) }} SAR</span></div>
 
             @if ($order->note)
                 <div class="note">
